@@ -1,7 +1,7 @@
 use nom::{
     bytes::complete::{tag, take_until},
     combinator::map,
-    sequence::{delimited, tuple},
+    sequence::delimited,
     IResult,
 };
 
@@ -16,15 +16,19 @@ pub fn parse_string(input: &str) -> IResult<&str, Atom> {
 }
 
 #[derive(Debug)]
+pub enum Spell {
+    AvadaKedabra,
+}
+
+#[derive(Debug)]
 pub enum Expression {
-    SpellCast(String, Atom),
+    SpellCast(Spell, Option<Atom>),
 }
 
 pub fn parse_spell_cast(input: &str) -> IResult<&str, Expression> {
-    let parse_spell = delimited(tag("~"), take_until("->"), tag("->"));
-    let parse_target = delimited(tag("->"), parse_string, tag(";"));
-    let parser = tuple((parse_spell, parse_target));
-    map(parser, |(spell, target)| {
-        Expression::SpellCast(spell.to_string(), target)
+    let parser = delimited(tag("~"), take_until(";"), tag(";"));
+    map(parser, |spell_name: &str| match spell_name {
+        "Avada Kedabra" => Expression::SpellCast(Spell::AvadaKedabra, None),
+        _ => panic!("Unknown spell: {}", spell_name),
     })(input)
 }
