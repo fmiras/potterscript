@@ -1,22 +1,40 @@
 use crate::parser::*;
 
-pub fn eval(expression: Expression) {
+fn eval_statement(statement: Statement) {
+    match statement {
+        Statement::ExpressionStatement(expression) => {
+            eval_expression(expression);
+        }
+    }
+}
+
+fn eval_expression(expression: Expression) {
     match expression {
-        Expression::SpellCast(Spell::AvadaKedabra, _) => {
+        Expression::SpellCast(spell, target) => {
+            eval_spell(spell, target);
+        }
+    }
+}
+
+fn eval_spell(spell: Spell, target: Option<Atom>) {
+    match spell {
+        Spell::AvadaKedabra => {
             panic!();
         }
-        Expression::SpellCast(Spell::Periculum, _) => {
-            println!("🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥");
+        Spell::Periculum => {
+            println!("🔥🔥🔥🔥🔥🔥🔥🔥🔥");
         }
-        Expression::SpellCast(Spell::Lumus, _) => {
+        Spell::Lumus => {
             todo!("Lumus")
         }
-        Expression::SpellCast(Spell::Revelio, Some(target)) => {
+        Spell::Revelio => {
             println!("👀 Revelio: {:?}", target);
         }
-        Expression::SpellCast(_, None) => {
-            panic!("Wand broken: {:?} requires target", expression);
-        }
-        _ => panic!("Unknown expression: {:?}", expression),
+    }
+}
+
+pub fn eval(program: Program) {
+    for statement in program.0 {
+        eval_statement(statement);
     }
 }

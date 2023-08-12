@@ -1,10 +1,13 @@
 use nom::{
     bytes::complete::{tag, take_until},
-    character::complete::alpha0,
+    character::complete::{alpha0, multispace0},
     combinator::{map, opt},
-    sequence::{delimited, tuple},
+    multi::many1,
+    sequence::{delimited, terminated, tuple},
     IResult,
 };
+
+// Atoms
 
 #[derive(Debug, PartialEq)]
 pub enum Atom {
@@ -16,6 +19,13 @@ pub fn parse_string(input: &str) -> IResult<&str, Atom> {
     map(parser, |string: &str| Atom::String(string.to_string()))(input)
 }
 
+// Expressions
+
+#[derive(Debug, PartialEq)]
+pub enum Expression {
+    SpellCast(Spell, Option<Atom>),
+}
+
 #[derive(Debug, PartialEq)]
 pub enum Spell {
     AvadaKedabra,
@@ -24,9 +34,8 @@ pub enum Spell {
     Lumus,
 }
 
-#[derive(Debug, PartialEq)]
-pub enum Expression {
-    SpellCast(Spell, Option<Atom>),
+pub fn parse_expression(input: &str) -> IResult<&str, Expression> {
+    parse_spell_cast(input)
 }
 
 pub fn parse_spell_cast(input: &str) -> IResult<&str, Expression> {
@@ -44,9 +53,37 @@ pub fn parse_spell_cast(input: &str) -> IResult<&str, Expression> {
     })(input)
 }
 
+// Statements
+
+#[derive(Debug, PartialEq)]
+pub enum Statement {
+    ExpressionStatement(Expression),
+}
+
+fn parse_statement(input: &str) -> IResult<&str, Statement> {
+    parse_expression_statement(input)
+}
+
+fn parse_expression_statement(input: &str) -> IResult<&str, Statement> {
+    let (rest, expression) = terminated(parse_expression, multispace0)(input)?;
+    let statement = Statement::ExpressionStatement(expression);
+    Ok((rest, statement))
+}
+
+// Program
+
+#[derive(Debug, PartialEq)]
+pub struct Program(pub Vec<Statement>);
+
+pub fn parse_program(input: &str) -> IResult<&str, Program> {
+    map(many1(terminated(parse_statement, multispace0)), Program)(input)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // Atoms
 
     #[test]
     fn test_parse_string() {
@@ -55,6 +92,8 @@ mod tests {
         let (_, actual) = parse_string(input).unwrap();
         assert_eq!(expected, actual);
     }
+
+    // Expressions
 
     #[test]
     fn test_parse_spell_cast() {
@@ -83,6 +122,44 @@ mod tests {
             Some(Atom::String("Hello, world!".to_string())),
         );
         let (_, actual) = parse_spell_cast(input).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    // Statements
+
+    #[test]
+    fn test_parse_expression_statement() {
+        let input = "~AvadaKedabra";
+        let expected =
+            Statement::ExpressionStatement(Expression::SpellCast(Spell::AvadaKedabra, None));
+        let (_, actual) = parse_expression_statement(input).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_parse_expression_statement_with_string() {
+        let input = "~Revelio \"Hello, world!\"";
+        let expected = Statement::ExpressionStatement(Expression::SpellCast(
+            Spell::Revelio,
+            Some(Atom::String("Hello, world!".to_string())),
+        ));
+        let (_, actual) = parse_expression_statement(input).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    // Program
+
+    #[test]
+    fn test_parse_program() {
+        let input = "~AvadaKedabra\n~Revelio \"Hello, world!\"";
+        let expected = Program(vec![
+            Statement::ExpressionStatement(Expression::SpellCast(Spell::AvadaKedabra, None)),
+            Statement::ExpressionStatement(Expression::SpellCast(
+                Spell::Revelio,
+                Some(Atom::String("Hello, world!".to_string())),
+            )),
+        ]);
+        let (_, actual) = parse_program(input).unwrap();
         assert_eq!(expected, actual);
     }
 }
