@@ -1,2 +1,4 @@
 ~Periculum
 ~Revelio "Hello, world!"
+x = "hola"
+~Revelio x

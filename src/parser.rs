@@ -1,6 +1,7 @@
 use nom::{
+    branch::alt,
     bytes::complete::{tag, take_until},
-    character::complete::{alpha0, multispace0},
+    character::complete::{alpha0, char, multispace0},
     combinator::{map, opt},
     multi::many1,
     sequence::{delimited, terminated, tuple},
@@ -9,14 +10,32 @@ use nom::{
 
 // Atoms
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Atom {
     String(String),
+    Variable(String),
+}
+
+impl Atom {
+    pub fn to_string(&self) -> String {
+        match self {
+            Atom::String(string) => string.to_string(),
+            Atom::Variable(var) => var.to_string(),
+        }
+    }
+}
+
+pub fn parse_atom(input: &str) -> IResult<&str, Atom> {
+    alt((parse_string, parse_variable))(input)
 }
 
 pub fn parse_string(input: &str) -> IResult<&str, Atom> {
     let parser = delimited(tag("\""), take_until("\""), tag("\""));
     map(parser, |string: &str| Atom::String(string.to_string()))(input)
+}
+
+pub fn parse_variable(input: &str) -> IResult<&str, Atom> {
+    map(alpha0, |var: &str| Atom::Variable(var.to_string()))(input)
 }
 
 // Expressions
@@ -41,7 +60,7 @@ pub fn parse_expression(input: &str) -> IResult<&str, Expression> {
 pub fn parse_spell_cast(input: &str) -> IResult<&str, Expression> {
     // take until ; or ->
     let spell_parser = delimited(tag("~"), alpha0, opt(tag(" ")));
-    let target_parser = parse_string;
+    let target_parser = parse_atom;
     let parser = tuple((spell_parser, opt(target_parser)));
 
     map(parser, |(spell, target)| match spell {
@@ -58,10 +77,11 @@ pub fn parse_spell_cast(input: &str) -> IResult<&str, Expression> {
 #[derive(Debug, PartialEq)]
 pub enum Statement {
     ExpressionStatement(Expression),
+    VariableDeclaration(String, Atom),
 }
 
 fn parse_statement(input: &str) -> IResult<&str, Statement> {
-    parse_expression_statement(input)
+    alt((parse_variable_declaration, parse_expression_statement))(input)
 }
 
 fn parse_expression_statement(input: &str) -> IResult<&str, Statement> {
@@ -69,6 +89,27 @@ fn parse_expression_statement(input: &str) -> IResult<&str, Statement> {
     let statement = Statement::ExpressionStatement(expression);
     Ok((rest, statement))
 }
+
+fn parse_variable_declaration(input: &str) -> IResult<&str, Statement> {
+    let (rest, (var, _, _, _, atom)) = tuple((
+        parse_variable,
+        multispace0,
+        char('='),
+        multispace0,
+        parse_atom,
+    ))(input)?;
+
+    let statement = Statement::VariableDeclaration(var.to_string(), atom);
+    Ok((rest, statement))
+}
+
+// fn parse_assignment(input: &str) -> IResult<&str, Statement> {
+//     let parse_assignment = pair(parse_variable, preceded(multispace0, char('=')));
+
+//     map(pair(parse_assignment, expression), |(var, expr)| {
+//         Statement::Assignment(var, expr)
+//     })(input)
+// }
 
 // Program
 
@@ -90,6 +131,14 @@ mod tests {
         let input = "\"Hello, world!\"";
         let expected = Atom::String("Hello, world!".to_string());
         let (_, actual) = parse_string(input).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_parse_variable() {
+        let input = "foo";
+        let expected = Atom::Variable("foo".to_string());
+        let (_, actual) = parse_variable(input).unwrap();
         assert_eq!(expected, actual);
     }
 
@@ -144,6 +193,17 @@ mod tests {
             Some(Atom::String("Hello, world!".to_string())),
         ));
         let (_, actual) = parse_expression_statement(input).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_parse_variable_declaration() {
+        let input = "foo = \"Hello, world!\"";
+        let expected = Statement::VariableDeclaration(
+            "foo".to_string(),
+            Atom::String("Hello, world!".to_string()),
+        );
+        let (_, actual) = parse_variable_declaration(input).unwrap();
         assert_eq!(expected, actual);
     }
 
