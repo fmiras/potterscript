@@ -1,7 +1,7 @@
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_until},
-    character::complete::{alpha0, char, multispace0},
+    character::complete::{alpha0, alpha1, char, multispace0},
     combinator::{map, opt},
     multi::many1,
     sequence::{delimited, terminated, tuple},
@@ -35,7 +35,7 @@ pub fn parse_string(input: &str) -> IResult<&str, Atom> {
 }
 
 pub fn parse_variable(input: &str) -> IResult<&str, Atom> {
-    map(alpha0, |var: &str| Atom::Variable(var.to_string()))(input)
+    map(alpha1, |var: &str| Atom::Variable(var.to_string()))(input)
 }
 
 // Expressions
