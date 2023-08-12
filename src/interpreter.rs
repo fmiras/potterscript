@@ -18,7 +18,7 @@ impl Interpreter {
             Statement::ExpressionStatement(expression) => {
                 self.eval_expression(expression);
             }
-            Statement::VariableDeclaration(name, value) => {
+            Statement::VariableAssignment(name, value) => {
                 let evaluated_value = self.eval_atom(value);
                 self.variables.insert(name, evaluated_value);
             }

@@ -77,11 +77,11 @@ pub fn parse_spell_cast(input: &str) -> IResult<&str, Expression> {
 #[derive(Debug, PartialEq)]
 pub enum Statement {
     ExpressionStatement(Expression),
-    VariableDeclaration(String, Atom),
+    VariableAssignment(String, Atom),
 }
 
 fn parse_statement(input: &str) -> IResult<&str, Statement> {
-    alt((parse_variable_declaration, parse_expression_statement))(input)
+    alt((parse_variable_assignment, parse_expression_statement))(input)
 }
 
 fn parse_expression_statement(input: &str) -> IResult<&str, Statement> {
@@ -90,7 +90,7 @@ fn parse_expression_statement(input: &str) -> IResult<&str, Statement> {
     Ok((rest, statement))
 }
 
-fn parse_variable_declaration(input: &str) -> IResult<&str, Statement> {
+fn parse_variable_assignment(input: &str) -> IResult<&str, Statement> {
     let (rest, (var, _, _, _, atom)) = tuple((
         parse_variable,
         multispace0,
@@ -99,7 +99,7 @@ fn parse_variable_declaration(input: &str) -> IResult<&str, Statement> {
         parse_atom,
     ))(input)?;
 
-    let statement = Statement::VariableDeclaration(var.to_string(), atom);
+    let statement = Statement::VariableAssignment(var.to_string(), atom);
     Ok((rest, statement))
 }
 
@@ -197,13 +197,13 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_variable_declaration() {
+    fn test_parse_variable_assignment() {
         let input = "foo = \"Hello, world!\"";
-        let expected = Statement::VariableDeclaration(
+        let expected = Statement::VariableAssignment(
             "foo".to_string(),
             Atom::String("Hello, world!".to_string()),
         );
-        let (_, actual) = parse_variable_declaration(input).unwrap();
+        let (_, actual) = parse_variable_assignment(input).unwrap();
         assert_eq!(expected, actual);
     }
 
