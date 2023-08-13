@@ -176,11 +176,13 @@ pub enum Statement {
 }
 
 fn parse_statement(input: &str) -> IResult<&str, Statement> {
-    alt((
+    let parser_content = alt((
         parse_if,
         parse_variable_assignment,
         parse_expression_statement,
-    ))(input)
+    ));
+
+    preceded(multispace0, terminated(parser_content, multispace0))(input)
 }
 
 fn parse_variable_assignment(input: &str) -> IResult<&str, Statement> {
@@ -276,6 +278,17 @@ mod tests {
     }
 
     // Expressions
+
+    #[test]
+    fn test_parse_statement_with_whitespaces() {
+        let input = " ~AvadaKedabra ";
+        let expected = Statement::ExpressionStatement(Expression::SpellCast(
+            Spell::AvadaKedabra,
+            Box::new(None),
+        ));
+        let (_, actual) = parse_statement(input).unwrap();
+        assert_eq!(expected, actual);
+    }
 
     #[test]
     fn test_parse_spell_cast() {
@@ -416,7 +429,7 @@ mod tests {
 
     #[test]
     fn test_parse_if() {
-        let input = "if true {~Revelio 4 }";
+        let input = "if true { ~Revelio 4 }";
         let expected = Statement::If(
             Atom::Boolean(true).into(),
             vec![Statement::ExpressionStatement(Expression::SpellCast(
@@ -435,7 +448,11 @@ mod tests {
           ~AvadaKedabra
         }";
         let expected = Statement::If(
-            Atom::Boolean(true).into(),
+            Expression::BinaryOperation(
+                BinaryOperation::Equal,
+                Box::new(Atom::Integer(4).into()),
+                Box::new(Atom::Integer(4).into()),
+            ),
             vec![
                 Statement::ExpressionStatement(Expression::SpellCast(
                     Spell::Revelio,
