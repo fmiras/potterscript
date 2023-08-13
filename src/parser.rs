@@ -1,13 +1,15 @@
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_until},
-    character::complete::{alpha0, alpha1, char, digit1, i64, multispace0},
-    combinator::{map, map_res, opt},
+    character::complete::{alpha0, alpha1, char, i64, multispace0},
+    combinator::{map, opt},
     multi::many1,
     number::complete::double,
     sequence::{delimited, terminated, tuple},
     IResult,
 };
+
+use crate::interpreter::RuntimeValue;
 
 // Atoms
 
@@ -32,14 +34,33 @@ impl Atom {
     }
 }
 
-fn parse_atom(input: &str) -> IResult<&str, Atom> {
-    alt((
+impl From<Atom> for Expression {
+    fn from(atom: Atom) -> Self {
+        Expression::Atom(atom)
+    }
+}
+
+impl From<Atom> for RuntimeValue {
+    fn from(atom: Atom) -> Self {
+        match atom {
+            Atom::Boolean(boolean) => RuntimeValue::Boolean(boolean),
+            Atom::Integer(integer) => RuntimeValue::Integer(integer),
+            Atom::Double(float) => RuntimeValue::Double(float),
+            Atom::String(string) => RuntimeValue::String(string),
+            Atom::Variable(var) => panic!("Cannot convert variable to RuntimeValue: {}", var),
+        }
+    }
+}
+
+fn parse_atom(input: &str) -> IResult<&str, Expression> {
+    let parser = alt((
         parse_boolean,
         parse_double,
         parse_integer,
         parse_string,
         parse_variable,
-    ))(input)
+    ));
+    map(parser, |atom| atom.into())(input)
 }
 
 fn parse_boolean(input: &str) -> IResult<&str, Atom> {
@@ -77,8 +98,9 @@ fn parse_variable(input: &str) -> IResult<&str, Atom> {
 
 #[derive(Debug, PartialEq)]
 pub enum Expression {
-    SpellCast(Spell, Option<Atom>),
-    BinaryOperation(BinaryOperation, Atom, Atom),
+    SpellCast(Spell, Box<Option<Expression>>),
+    BinaryOperation(BinaryOperation, Box<Expression>, Box<Expression>),
+    Atom(Atom),
 }
 
 #[derive(Debug, PartialEq)]
@@ -100,20 +122,22 @@ pub enum BinaryOperation {
 }
 
 pub fn parse_expression(input: &str) -> IResult<&str, Expression> {
-    alt((parse_spell_cast, parse_binary_operation))(input)
+    dbg!("parse_expression");
+    dbg!(input);
+    alt((parse_spell_cast, parse_binary_operation, parse_atom))(input)
 }
 
 pub fn parse_spell_cast(input: &str) -> IResult<&str, Expression> {
     // take until ; or ->
     let spell_parser = delimited(tag("~"), alpha0, opt(tag(" ")));
-    let target_parser = parse_atom;
+    let target_parser = parse_expression;
     let parser = tuple((spell_parser, opt(target_parser)));
 
     map(parser, |(spell, target)| match spell {
-        "AvadaKedabra" => Expression::SpellCast(Spell::AvadaKedabra, target),
-        "Revelio" => Expression::SpellCast(Spell::Revelio, target),
-        "Periculum" => Expression::SpellCast(Spell::Periculum, target),
-        "Lumus" => Expression::SpellCast(Spell::Lumus, target),
+        "AvadaKedabra" => Expression::SpellCast(Spell::AvadaKedabra, Box::new(target)),
+        "Revelio" => Expression::SpellCast(Spell::Revelio, Box::new(target)),
+        "Periculum" => Expression::SpellCast(Spell::Periculum, Box::new(target)),
+        "Lumus" => Expression::SpellCast(Spell::Lumus, Box::new(target)),
         _ => panic!("Wand broken: Unknown spell: {}", spell),
     })(input)
 }
@@ -127,7 +151,7 @@ pub fn parse_binary_operation(input: &str) -> IResult<&str, Expression> {
         parse_atom,
     ))(input)?;
 
-    let expression = Expression::BinaryOperation(op, left, right);
+    let expression = Expression::BinaryOperation(op, Box::new(left), Box::new(right));
     Ok((rest, expression))
 }
 
@@ -147,7 +171,7 @@ pub fn parse_binary_operator(input: &str) -> IResult<&str, BinaryOperation> {
 #[derive(Debug, PartialEq)]
 pub enum Statement {
     ExpressionStatement(Expression),
-    VariableAssignment(String, Atom),
+    VariableAssignment(String, Expression),
 }
 
 fn parse_statement(input: &str) -> IResult<&str, Statement> {
@@ -166,7 +190,7 @@ fn parse_variable_assignment(input: &str) -> IResult<&str, Statement> {
         multispace0,
         char('='),
         multispace0,
-        parse_atom,
+        parse_expression,
     ))(input)?;
 
     let statement = Statement::VariableAssignment(var.to_string(), atom);
@@ -241,7 +265,7 @@ mod tests {
     #[test]
     fn test_parse_spell_cast() {
         let input = "~AvadaKedabra";
-        let expected = Expression::SpellCast(Spell::AvadaKedabra, None);
+        let expected = Expression::SpellCast(Spell::AvadaKedabra, Box::new(None));
         let (_, actual) = parse_spell_cast(input).unwrap();
         assert_eq!(expected, actual);
     }
@@ -251,7 +275,7 @@ mod tests {
         let input = "~Revelio \"Hello, world!\"";
         let expected = Expression::SpellCast(
             Spell::Revelio,
-            Some(Atom::String("Hello, world!".to_string())),
+            Box::new(Some(Atom::String("Hello, world!".to_string()).into())),
         );
         let (_, actual) = parse_spell_cast(input).unwrap();
         assert_eq!(expected, actual);
@@ -262,7 +286,7 @@ mod tests {
         let input = "~Revelio \"Hello, world!\" ";
         let expected = Expression::SpellCast(
             Spell::Revelio,
-            Some(Atom::String("Hello, world!".to_string())),
+            Box::new(Some(Atom::String("Hello, world!".to_string()).into())),
         );
         let (_, actual) = parse_spell_cast(input).unwrap();
         assert_eq!(expected, actual);
@@ -273,8 +297,8 @@ mod tests {
         let input = "\"Hello, \" + \"world!\"";
         let expected = Expression::BinaryOperation(
             BinaryOperation::Plus,
-            Atom::String("Hello, ".to_string()),
-            Atom::String("world!".to_string()),
+            Box::new(Atom::String("Hello, ".to_string()).into()),
+            Box::new(Atom::String("world!".to_string()).into()),
         );
         let (_, actual) = parse_binary_operation(input).unwrap();
         assert_eq!(expected, actual);
@@ -285,8 +309,8 @@ mod tests {
         let input = "foo + \"bar\"";
         let expected = Expression::BinaryOperation(
             BinaryOperation::Plus,
-            Atom::Variable("foo".to_string()),
-            Atom::String("bar".to_string()),
+            Box::new(Atom::Variable("foo".to_string()).into()),
+            Box::new(Atom::String("bar".to_string()).into()),
         );
         let (_, actual) = parse_binary_operation(input).unwrap();
         assert_eq!(expected, actual);
@@ -297,8 +321,8 @@ mod tests {
         let input = "123 + 456";
         let expected = Expression::BinaryOperation(
             BinaryOperation::Plus,
-            Atom::Integer(123),
-            Atom::Integer(456),
+            Box::new(Atom::Integer(123).into()),
+            Box::new(Atom::Integer(456).into()),
         );
         let (_, actual) = parse_binary_operation(input).unwrap();
         assert_eq!(expected, actual);
@@ -309,8 +333,8 @@ mod tests {
         let input = "123.456 + 456.789";
         let expected = Expression::BinaryOperation(
             BinaryOperation::Plus,
-            Atom::Double(123.456),
-            Atom::Double(456.789),
+            Box::new(Atom::Double(123.456).into()),
+            Box::new(Atom::Double(456.789).into()),
         );
         let (_, actual) = parse_binary_operation(input).unwrap();
         assert_eq!(expected, actual);
@@ -321,8 +345,8 @@ mod tests {
         let input = "true == false";
         let expected = Expression::BinaryOperation(
             BinaryOperation::Equal,
-            Atom::Boolean(true),
-            Atom::Boolean(false),
+            Box::new(Atom::Boolean(true).into()),
+            Box::new(Atom::Boolean(false).into()),
         );
         let (_, actual) = parse_binary_operation(input).unwrap();
         assert_eq!(expected, actual);
@@ -333,8 +357,8 @@ mod tests {
         let input = "foo + 4";
         let expected = Expression::BinaryOperation(
             BinaryOperation::Plus,
-            Atom::Variable("foo".to_string()),
-            Atom::Integer(4),
+            Box::new(Atom::Variable("foo".to_string()).into()),
+            Box::new(Atom::Integer(4).into()),
         );
         let (_, actual) = parse_binary_operation(input).unwrap();
         assert_eq!(expected, actual);
@@ -345,8 +369,10 @@ mod tests {
     #[test]
     fn test_parse_expression_statement() {
         let input = "~AvadaKedabra";
-        let expected =
-            Statement::ExpressionStatement(Expression::SpellCast(Spell::AvadaKedabra, None));
+        let expected = Statement::ExpressionStatement(Expression::SpellCast(
+            Spell::AvadaKedabra,
+            Box::new(None),
+        ));
         let (_, actual) = parse_expression_statement(input).unwrap();
         assert_eq!(expected, actual);
     }
@@ -356,7 +382,7 @@ mod tests {
         let input = "~Revelio \"Hello, world!\"";
         let expected = Statement::ExpressionStatement(Expression::SpellCast(
             Spell::Revelio,
-            Some(Atom::String("Hello, world!".to_string())),
+            Box::new(Some(Atom::String("Hello, world!".to_string()).into())),
         ));
         let (_, actual) = parse_expression_statement(input).unwrap();
         assert_eq!(expected, actual);
@@ -367,7 +393,7 @@ mod tests {
         let input = "foo = \"Hello, world!\"";
         let expected = Statement::VariableAssignment(
             "foo".to_string(),
-            Atom::String("Hello, world!".to_string()),
+            Atom::String("Hello, world!".to_string()).into(),
         );
         let (_, actual) = parse_variable_assignment(input).unwrap();
         assert_eq!(expected, actual);
@@ -379,10 +405,13 @@ mod tests {
     fn test_parse_program() {
         let input = "~AvadaKedabra\n~Revelio \"Hello, world!\"";
         let expected = Program(vec![
-            Statement::ExpressionStatement(Expression::SpellCast(Spell::AvadaKedabra, None)),
+            Statement::ExpressionStatement(Expression::SpellCast(
+                Spell::AvadaKedabra,
+                Box::new(None),
+            )),
             Statement::ExpressionStatement(Expression::SpellCast(
                 Spell::Revelio,
-                Some(Atom::String("Hello, world!".to_string())),
+                Box::new(Some(Atom::String("Hello, world!".to_string()).into())),
             )),
         ]);
         let (_, actual) = parse_program(input).unwrap();
