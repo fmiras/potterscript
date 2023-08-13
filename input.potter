@@ -1,4 +1,6 @@
 ~Periculum
 ~Revelio "Hello, world!"
-x = "hola"
+x = "hola" + "asd"
 ~Revelio x
+y = 3 + 8
+~Revelio y

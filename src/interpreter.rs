@@ -1,14 +1,105 @@
 use core::panic;
 use std::collections::HashMap;
+use std::ops;
 
 use crate::parser::*;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum RuntimeValue {
     Integer(i64),
     Double(f64),
     Boolean(bool),
     String(String),
+}
+
+impl ops::Add for RuntimeValue {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        let selfValue = self.clone();
+        let rhsValue = rhs.clone();
+
+        match (self, rhs) {
+            (RuntimeValue::Integer(left), RuntimeValue::Integer(right)) => {
+                RuntimeValue::Integer(left + right)
+            }
+            (RuntimeValue::Double(left), RuntimeValue::Double(right)) => {
+                RuntimeValue::Double(left + right)
+            }
+            (RuntimeValue::String(left), RuntimeValue::String(right)) => {
+                RuntimeValue::String(left + &right)
+            }
+            _ => panic!("Cannot add {:?} and {:?}", selfValue, rhsValue),
+        }
+    }
+}
+
+impl ops::Sub for RuntimeValue {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        let selfValue = self.clone();
+        let rhsValue = rhs.clone();
+
+        match (self, rhs) {
+            (RuntimeValue::Integer(left), RuntimeValue::Integer(right)) => {
+                RuntimeValue::Integer(left - right)
+            }
+            (RuntimeValue::Double(left), RuntimeValue::Double(right)) => {
+                RuntimeValue::Double(left - right)
+            }
+            _ => panic!("Cannot subtract {:?} and {:?}", selfValue, rhsValue),
+        }
+    }
+}
+
+impl ops::Mul for RuntimeValue {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        let selfValue = self.clone();
+        let rhsValue = rhs.clone();
+
+        match (self, rhs) {
+            (RuntimeValue::Integer(left), RuntimeValue::Integer(right)) => {
+                RuntimeValue::Integer(left * right)
+            }
+            (RuntimeValue::Double(left), RuntimeValue::Double(right)) => {
+                RuntimeValue::Double(left * right)
+            }
+            _ => panic!("Cannot multiply {:?} and {:?}", selfValue, rhsValue),
+        }
+    }
+}
+
+impl ops::Div for RuntimeValue {
+    type Output = Self;
+
+    fn div(self, rhs: Self) -> Self::Output {
+        let selfValue = self.clone();
+        let rhsValue = rhs.clone();
+
+        match (self, rhs) {
+            (RuntimeValue::Integer(left), RuntimeValue::Integer(right)) => {
+                RuntimeValue::Integer(left / right)
+            }
+            (RuntimeValue::Double(left), RuntimeValue::Double(right)) => {
+                RuntimeValue::Double(left / right)
+            }
+            _ => panic!("Cannot divide {:?} and {:?}", selfValue, rhsValue),
+        }
+    }
+}
+
+impl ops::Not for RuntimeValue {
+    type Output = Self;
+
+    fn not(self) -> Self::Output {
+        match self {
+            RuntimeValue::Boolean(value) => RuntimeValue::Boolean(!value),
+            _ => panic!("Cannot negate {:?}", self),
+        }
+    }
 }
 
 pub struct Interpreter {
@@ -48,8 +139,18 @@ impl Interpreter {
     fn eval_expression(&mut self, expression: Expression) -> Option<RuntimeValue> {
         match expression {
             Expression::SpellCast(spell, target) => self.eval_spell(spell, target),
-            Expression::BinaryOperation(_, _, _) => {
-                todo!("BinaryOperation");
+            Expression::BinaryOperation(operation, left, right) => {
+                match (self.eval_expression(*left), self.eval_expression(*right)) {
+                    (Some(left), Some(right)) => match operation {
+                        BinaryOperation::Plus => Some(left + right),
+                        BinaryOperation::Minus => Some(left - right),
+                        BinaryOperation::Times => Some(left * right),
+                        BinaryOperation::Divide => Some(left / right),
+                        BinaryOperation::Equal => Some(RuntimeValue::Boolean(left == right)),
+                        BinaryOperation::NotEqual => Some(RuntimeValue::Boolean(left != right)),
+                    },
+                    _ => None,
+                }
             }
             Expression::Atom(atom) => Some(self.eval_atom(atom)),
         }
@@ -69,7 +170,8 @@ impl Interpreter {
                 None
             }
             Spell::Lumus => {
-                todo!("Lumus");
+                self.invert_variables_background();
+                None
             }
 
             Spell::Revelio => match *target {
@@ -92,4 +194,26 @@ impl Interpreter {
             _ => atom.into(),
         }
     }
+
+    fn invert_variables_background(&mut self) {
+        let mut new_variables = HashMap::new();
+
+        for (name, value) in self.variables.iter() {
+            if let RuntimeValue::String(value) = value {
+                new_variables.insert(name.clone(), invert_string_background(value));
+            }
+        }
+
+        self.variables = new_variables;
+    }
+}
+
+fn invert_string_background(string: &str) -> RuntimeValue {
+    let mut inverted = String::new();
+
+    for c in string.chars() {
+        inverted.insert(0, c);
+    }
+
+    RuntimeValue::String(inverted)
 }
