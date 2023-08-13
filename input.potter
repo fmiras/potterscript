@@ -7,7 +7,8 @@ x = "hola" + "asd"
 y = 3 + 8
 ~Revelio y
 
-if y == 11 { 
+if y == 11 {
+  ~Lumus
   ~Revelio "y is 11" 
 } 
 

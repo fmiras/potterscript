@@ -4,5 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+colored = "1.1.0"
 nom = "7.1.3"
 

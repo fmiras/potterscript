@@ -1,6 +1,8 @@
 use core::panic;
 use std::collections::HashMap;
-use std::ops;
+use std::{fmt, ops};
+
+use colored::Colorize;
 
 use crate::parser::*;
 
@@ -10,6 +12,17 @@ pub enum RuntimeValue {
     Double(f64),
     Boolean(bool),
     String(String),
+}
+
+impl fmt::Display for RuntimeValue {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            RuntimeValue::Integer(value) => write!(f, "{}", value),
+            RuntimeValue::Double(value) => write!(f, "{}", value),
+            RuntimeValue::Boolean(value) => write!(f, "{}", value),
+            RuntimeValue::String(value) => write!(f, "{}", value),
+        }
+    }
 }
 
 impl ops::Add for RuntimeValue {
@@ -104,12 +117,14 @@ impl ops::Not for RuntimeValue {
 
 pub struct Interpreter {
     variables: HashMap<String, RuntimeValue>,
+    is_lumus_casted: bool,
 }
 
 impl Interpreter {
     pub fn new() -> Self {
         Self {
             variables: HashMap::new(),
+            is_lumus_casted: false,
         }
     }
 
@@ -180,13 +195,20 @@ impl Interpreter {
                 None
             }
             Spell::Lumus => {
-                self.invert_variables_background();
+                self.is_lumus_casted = true;
                 None
             }
 
             Spell::Revelio => match *target {
                 Some(target) => {
-                    println!("👀 Revelio: {:?}", self.eval_expression(target));
+                    let mut string_target: String = self
+                        .eval_expression(target)
+                        .unwrap_or(RuntimeValue::String("".to_string()))
+                        .to_string();
+                    if self.is_lumus_casted {
+                        string_target = string_target.black().on_white().to_string();
+                    }
+                    println!("{}", string_target);
                     None
                 }
                 None => None,
@@ -204,26 +226,4 @@ impl Interpreter {
             _ => atom.into(),
         }
     }
-
-    fn invert_variables_background(&mut self) {
-        let mut new_variables = HashMap::new();
-
-        for (name, value) in self.variables.iter() {
-            if let RuntimeValue::String(value) = value {
-                new_variables.insert(name.clone(), invert_string_background(value));
-            }
-        }
-
-        self.variables = new_variables;
-    }
-}
-
-fn invert_string_background(string: &str) -> RuntimeValue {
-    let mut inverted = String::new();
-
-    for c in string.chars() {
-        inverted.insert(0, c);
-    }
-
-    RuntimeValue::String(inverted)
 }
