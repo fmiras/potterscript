@@ -15,3 +15,11 @@ if y == 11 {
 if y == 12 {
   ~Revelio "y is not 11" 
 }
+
+y = 8
+
+~PetrificusTotalus y
+
+y = 4
+
+

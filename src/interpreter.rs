@@ -117,6 +117,7 @@ impl ops::Not for RuntimeValue {
 
 pub struct Interpreter {
     variables: HashMap<String, RuntimeValue>,
+    constants: HashMap<String, RuntimeValue>,
     is_lumus_casted: bool,
 }
 
@@ -124,6 +125,7 @@ impl Interpreter {
     pub fn new() -> Self {
         Self {
             variables: HashMap::new(),
+            constants: HashMap::new(),
             is_lumus_casted: false,
         }
     }
@@ -137,6 +139,10 @@ impl Interpreter {
     fn eval_statement(&mut self, statement: Statement) {
         match statement {
             Statement::VariableAssignment(name, value) => {
+                if self.constants.contains_key(&name) {
+                    panic!("Cannot re-assign a constant!");
+                }
+
                 dbg!(format!("VariableAssignment: {:?} = {:?}", name, value));
                 let evaluated_value = self.eval_expression(value);
 
@@ -212,6 +218,17 @@ impl Interpreter {
                     None
                 }
                 None => None,
+            },
+            Spell::PetrificusTotalus => match *target {
+                // pattern match Expression::Atom(Atom::Variable(var_name))
+                Some(Expression::Atom(Atom::Variable(var_name))) => {
+                    let value = self.variables.remove(&var_name);
+                    if let Some(value) = value {
+                        self.constants.insert(var_name, value);
+                    }
+                    None
+                }
+                _ => None,
             },
         }
     }
