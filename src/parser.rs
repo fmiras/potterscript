@@ -1,9 +1,10 @@
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_until},
-    character::complete::{alpha0, alpha1, char, multispace0},
-    combinator::{map, opt},
+    character::complete::{alpha0, alpha1, char, digit1, i64, multispace0},
+    combinator::{map, map_res, opt},
     multi::many1,
+    number::complete::double,
     sequence::{delimited, terminated, tuple},
     IResult,
 };
@@ -14,27 +15,61 @@ use nom::{
 pub enum Atom {
     String(String),
     Variable(String),
+    Boolean(bool),
+    Integer(i64),
+    Double(f64),
 }
 
 impl Atom {
     pub fn to_string(&self) -> String {
         match self {
+            Atom::Boolean(boolean) => boolean.to_string(),
+            Atom::Integer(integer) => integer.to_string(),
+            Atom::Double(float) => float.to_string(),
             Atom::String(string) => string.to_string(),
             Atom::Variable(var) => var.to_string(),
         }
     }
 }
 
-pub fn parse_atom(input: &str) -> IResult<&str, Atom> {
-    alt((parse_string, parse_variable))(input)
+fn parse_atom(input: &str) -> IResult<&str, Atom> {
+    alt((
+        parse_boolean,
+        parse_double,
+        parse_integer,
+        parse_string,
+        parse_variable,
+    ))(input)
 }
 
-pub fn parse_string(input: &str) -> IResult<&str, Atom> {
+fn parse_boolean(input: &str) -> IResult<&str, Atom> {
+    let parser = alt((tag("true"), tag("false")));
+    map(parser, |boolean: &str| Atom::Boolean(boolean == "true"))(input)
+}
+
+fn parse_double(input: &str) -> IResult<&str, Atom> {
+    if !input.contains(".") {
+        return Err(nom::Err::Error(nom::error::Error::new(
+            input,
+            nom::error::ErrorKind::Digit,
+        )));
+    }
+
+    let parser = double;
+    map(parser, |float| Atom::Double(float))(input)
+}
+
+fn parse_integer(input: &str) -> IResult<&str, Atom> {
+    let parser = i64;
+    map(parser, |integer| Atom::Integer(integer))(input)
+}
+
+fn parse_string(input: &str) -> IResult<&str, Atom> {
     let parser = delimited(tag("\""), take_until("\""), tag("\""));
     map(parser, |string: &str| Atom::String(string.to_string()))(input)
 }
 
-pub fn parse_variable(input: &str) -> IResult<&str, Atom> {
+fn parse_variable(input: &str) -> IResult<&str, Atom> {
     map(alpha1, |var: &str| Atom::Variable(var.to_string()))(input)
 }
 
@@ -43,6 +78,7 @@ pub fn parse_variable(input: &str) -> IResult<&str, Atom> {
 #[derive(Debug, PartialEq)]
 pub enum Expression {
     SpellCast(Spell, Option<Atom>),
+    BinaryOperation(BinaryOperation, Atom, Atom),
 }
 
 #[derive(Debug, PartialEq)]
@@ -53,8 +89,18 @@ pub enum Spell {
     Lumus,
 }
 
+#[derive(Debug, Eq, PartialEq, Clone)]
+pub enum BinaryOperation {
+    Plus,
+    Minus,
+    Times,
+    Divide,
+    Equal,
+    NotEqual,
+}
+
 pub fn parse_expression(input: &str) -> IResult<&str, Expression> {
-    parse_spell_cast(input)
+    alt((parse_spell_cast, parse_binary_operation))(input)
 }
 
 pub fn parse_spell_cast(input: &str) -> IResult<&str, Expression> {
@@ -70,6 +116,30 @@ pub fn parse_spell_cast(input: &str) -> IResult<&str, Expression> {
         "Lumus" => Expression::SpellCast(Spell::Lumus, target),
         _ => panic!("Wand broken: Unknown spell: {}", spell),
     })(input)
+}
+
+pub fn parse_binary_operation(input: &str) -> IResult<&str, Expression> {
+    let (rest, (left, _, op, _, right)) = tuple((
+        parse_atom,
+        multispace0,
+        parse_binary_operator,
+        multispace0,
+        parse_atom,
+    ))(input)?;
+
+    let expression = Expression::BinaryOperation(op, left, right);
+    Ok((rest, expression))
+}
+
+pub fn parse_binary_operator(input: &str) -> IResult<&str, BinaryOperation> {
+    alt((
+        map(char('+'), |_| BinaryOperation::Plus),
+        map(char('-'), |_| BinaryOperation::Minus),
+        map(char('*'), |_| BinaryOperation::Times),
+        map(char('/'), |_| BinaryOperation::Divide),
+        map(tag("=="), |_| BinaryOperation::Equal),
+        map(tag("!="), |_| BinaryOperation::NotEqual),
+    ))(input)
 }
 
 // Statements
@@ -103,14 +173,6 @@ fn parse_variable_assignment(input: &str) -> IResult<&str, Statement> {
     Ok((rest, statement))
 }
 
-// fn parse_assignment(input: &str) -> IResult<&str, Statement> {
-//     let parse_assignment = pair(parse_variable, preceded(multispace0, char('=')));
-
-//     map(pair(parse_assignment, expression), |(var, expr)| {
-//         Statement::Assignment(var, expr)
-//     })(input)
-// }
-
 // Program
 
 #[derive(Debug, PartialEq)]
@@ -139,6 +201,38 @@ mod tests {
         let input = "foo";
         let expected = Atom::Variable("foo".to_string());
         let (_, actual) = parse_variable(input).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_parse_boolean_true() {
+        let input = "true";
+        let expected = Atom::Boolean(true);
+        let (_, actual) = parse_boolean(input).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_parse_boolean_false() {
+        let input = "false";
+        let expected = Atom::Boolean(false);
+        let (_, actual) = parse_boolean(input).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_parse_double() {
+        let input = "123.456";
+        let expected = Atom::Double(123.456);
+        let (_, actual) = parse_double(input).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_parse_integer() {
+        let input = "123";
+        let expected = Atom::Integer(123);
+        let (_, actual) = parse_integer(input).unwrap();
         assert_eq!(expected, actual);
     }
 
@@ -171,6 +265,78 @@ mod tests {
             Some(Atom::String("Hello, world!".to_string())),
         );
         let (_, actual) = parse_spell_cast(input).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_parse_binary_operation() {
+        let input = "\"Hello, \" + \"world!\"";
+        let expected = Expression::BinaryOperation(
+            BinaryOperation::Plus,
+            Atom::String("Hello, ".to_string()),
+            Atom::String("world!".to_string()),
+        );
+        let (_, actual) = parse_binary_operation(input).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_parse_binary_operation_with_variable() {
+        let input = "foo + \"bar\"";
+        let expected = Expression::BinaryOperation(
+            BinaryOperation::Plus,
+            Atom::Variable("foo".to_string()),
+            Atom::String("bar".to_string()),
+        );
+        let (_, actual) = parse_binary_operation(input).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_parse_binary_operation_with_integer() {
+        let input = "123 + 456";
+        let expected = Expression::BinaryOperation(
+            BinaryOperation::Plus,
+            Atom::Integer(123),
+            Atom::Integer(456),
+        );
+        let (_, actual) = parse_binary_operation(input).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_parse_binary_operation_with_double() {
+        let input = "123.456 + 456.789";
+        let expected = Expression::BinaryOperation(
+            BinaryOperation::Plus,
+            Atom::Double(123.456),
+            Atom::Double(456.789),
+        );
+        let (_, actual) = parse_binary_operation(input).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_parse_binary_operation_with_boolean() {
+        let input = "true == false";
+        let expected = Expression::BinaryOperation(
+            BinaryOperation::Equal,
+            Atom::Boolean(true),
+            Atom::Boolean(false),
+        );
+        let (_, actual) = parse_binary_operation(input).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_parse_binary_operation_with_variable_and_integer() {
+        let input = "foo + 4";
+        let expected = Expression::BinaryOperation(
+            BinaryOperation::Plus,
+            Atom::Variable("foo".to_string()),
+            Atom::Integer(4),
+        );
+        let (_, actual) = parse_binary_operation(input).unwrap();
         assert_eq!(expected, actual);
     }
 
