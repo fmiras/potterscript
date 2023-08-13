@@ -5,7 +5,7 @@ use nom::{
     combinator::{map, opt},
     multi::many1,
     number::complete::double,
-    sequence::{delimited, terminated, tuple},
+    sequence::{delimited, pair, preceded, terminated, tuple},
     IResult,
 };
 
@@ -170,18 +170,17 @@ pub fn parse_binary_operator(input: &str) -> IResult<&str, BinaryOperation> {
 
 #[derive(Debug, PartialEq)]
 pub enum Statement {
-    ExpressionStatement(Expression),
     VariableAssignment(String, Expression),
+    ExpressionStatement(Expression),
+    If(Expression, Vec<Statement>),
 }
 
 fn parse_statement(input: &str) -> IResult<&str, Statement> {
-    alt((parse_variable_assignment, parse_expression_statement))(input)
-}
-
-fn parse_expression_statement(input: &str) -> IResult<&str, Statement> {
-    let (rest, expression) = terminated(parse_expression, multispace0)(input)?;
-    let statement = Statement::ExpressionStatement(expression);
-    Ok((rest, statement))
+    alt((
+        parse_if,
+        parse_variable_assignment,
+        parse_expression_statement,
+    ))(input)
 }
 
 fn parse_variable_assignment(input: &str) -> IResult<&str, Statement> {
@@ -195,6 +194,22 @@ fn parse_variable_assignment(input: &str) -> IResult<&str, Statement> {
 
     let statement = Statement::VariableAssignment(var.to_string(), atom);
     Ok((rest, statement))
+}
+
+fn parse_expression_statement(input: &str) -> IResult<&str, Statement> {
+    let (rest, expression) = terminated(parse_expression, multispace0)(input)?;
+    let statement = Statement::ExpressionStatement(expression);
+    Ok((rest, statement))
+}
+
+fn parse_if(input: &str) -> IResult<&str, Statement> {
+    let parse_condition = preceded(multispace0, terminated(parse_expression, multispace0));
+    let parse_block = delimited(char('{'), many1(parse_statement), char('}'));
+
+    map(
+        pair(preceded(tag("if"), parse_condition), parse_block),
+        |(cond, true_block)| Statement::If(cond, true_block),
+    )(input)
 }
 
 // Program
@@ -367,6 +382,17 @@ mod tests {
     // Statements
 
     #[test]
+    fn test_parse_variable_assignment() {
+        let input = "foo = \"Hello, world!\"";
+        let expected = Statement::VariableAssignment(
+            "foo".to_string(),
+            Atom::String("Hello, world!".to_string()).into(),
+        );
+        let (_, actual) = parse_variable_assignment(input).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
     fn test_parse_expression_statement() {
         let input = "~AvadaKedabra";
         let expected = Statement::ExpressionStatement(Expression::SpellCast(
@@ -389,13 +415,39 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_variable_assignment() {
-        let input = "foo = \"Hello, world!\"";
-        let expected = Statement::VariableAssignment(
-            "foo".to_string(),
-            Atom::String("Hello, world!".to_string()).into(),
+    fn test_parse_if() {
+        let input = "if true {~Revelio 4 }";
+        let expected = Statement::If(
+            Atom::Boolean(true).into(),
+            vec![Statement::ExpressionStatement(Expression::SpellCast(
+                Spell::Revelio,
+                Box::new(Some(Atom::Integer(4).into())),
+            ))],
         );
-        let (_, actual) = parse_variable_assignment(input).unwrap();
+        let (_, actual) = parse_if(input).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_parse_if_multiple_statements() {
+        let input = "if 4 == 4 {
+          ~Revelio 4 
+          ~AvadaKedabra
+        }";
+        let expected = Statement::If(
+            Atom::Boolean(true).into(),
+            vec![
+                Statement::ExpressionStatement(Expression::SpellCast(
+                    Spell::Revelio,
+                    Box::new(Some(Atom::Integer(4).into())),
+                )),
+                Statement::ExpressionStatement(Expression::SpellCast(
+                    Spell::AvadaKedabra,
+                    Box::new(None),
+                )),
+            ],
+        );
+        let (_, actual) = parse_if(input).unwrap();
         assert_eq!(expected, actual);
     }
 

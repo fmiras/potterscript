@@ -1,6 +1,12 @@
 ~Periculum
 ~Revelio "Hello, world!"
+
 x = "hola" + "asd"
 ~Revelio x
+
 y = 3 + 8
 ~Revelio y
+
+if y == 11 {~Revelio "y is 11" } 
+
+if y == 12 {~Revelio "y is not 11" }

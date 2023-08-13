@@ -16,8 +16,8 @@ impl ops::Add for RuntimeValue {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
-        let selfValue = self.clone();
-        let rhsValue = rhs.clone();
+        let self_value = self.clone();
+        let rhs_value = rhs.clone();
 
         match (self, rhs) {
             (RuntimeValue::Integer(left), RuntimeValue::Integer(right)) => {
@@ -29,7 +29,7 @@ impl ops::Add for RuntimeValue {
             (RuntimeValue::String(left), RuntimeValue::String(right)) => {
                 RuntimeValue::String(left + &right)
             }
-            _ => panic!("Cannot add {:?} and {:?}", selfValue, rhsValue),
+            _ => panic!("Cannot add {:?} and {:?}", self_value, rhs_value),
         }
     }
 }
@@ -38,8 +38,8 @@ impl ops::Sub for RuntimeValue {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        let selfValue = self.clone();
-        let rhsValue = rhs.clone();
+        let self_value = self.clone();
+        let rhs_value = rhs.clone();
 
         match (self, rhs) {
             (RuntimeValue::Integer(left), RuntimeValue::Integer(right)) => {
@@ -48,7 +48,7 @@ impl ops::Sub for RuntimeValue {
             (RuntimeValue::Double(left), RuntimeValue::Double(right)) => {
                 RuntimeValue::Double(left - right)
             }
-            _ => panic!("Cannot subtract {:?} and {:?}", selfValue, rhsValue),
+            _ => panic!("Cannot subtract {:?} and {:?}", self_value, rhs_value),
         }
     }
 }
@@ -57,8 +57,8 @@ impl ops::Mul for RuntimeValue {
     type Output = Self;
 
     fn mul(self, rhs: Self) -> Self::Output {
-        let selfValue = self.clone();
-        let rhsValue = rhs.clone();
+        let self_value = self.clone();
+        let rhs_value = rhs.clone();
 
         match (self, rhs) {
             (RuntimeValue::Integer(left), RuntimeValue::Integer(right)) => {
@@ -67,7 +67,7 @@ impl ops::Mul for RuntimeValue {
             (RuntimeValue::Double(left), RuntimeValue::Double(right)) => {
                 RuntimeValue::Double(left * right)
             }
-            _ => panic!("Cannot multiply {:?} and {:?}", selfValue, rhsValue),
+            _ => panic!("Cannot multiply {:?} and {:?}", self_value, rhs_value),
         }
     }
 }
@@ -76,8 +76,8 @@ impl ops::Div for RuntimeValue {
     type Output = Self;
 
     fn div(self, rhs: Self) -> Self::Output {
-        let selfValue = self.clone();
-        let rhsValue = rhs.clone();
+        let self_value = self.clone();
+        let rhs_value = rhs.clone();
 
         match (self, rhs) {
             (RuntimeValue::Integer(left), RuntimeValue::Integer(right)) => {
@@ -86,7 +86,7 @@ impl ops::Div for RuntimeValue {
             (RuntimeValue::Double(left), RuntimeValue::Double(right)) => {
                 RuntimeValue::Double(left / right)
             }
-            _ => panic!("Cannot divide {:?} and {:?}", selfValue, rhsValue),
+            _ => panic!("Cannot divide {:?} and {:?}", self_value, rhs_value),
         }
     }
 }
@@ -121,16 +121,26 @@ impl Interpreter {
 
     fn eval_statement(&mut self, statement: Statement) {
         match statement {
-            Statement::ExpressionStatement(expression) => {
-                self.eval_expression(expression);
-            }
             Statement::VariableAssignment(name, value) => {
+                dbg!(format!("VariableAssignment: {:?} = {:?}", name, value));
                 let evaluated_value = self.eval_expression(value);
 
                 if let Some(evaluated_value) = evaluated_value {
                     self.variables.insert(name, evaluated_value);
                 } else {
                     panic!("Cannot assign None to variable");
+                }
+            }
+            Statement::ExpressionStatement(expression) => {
+                dbg!(format!("ExpressionStatement: {:?}", expression));
+                self.eval_expression(expression);
+            }
+            Statement::If(condition, true_block) => {
+                dbg!(format!("If: {:?} {{ ... }}", condition));
+                if let Some(RuntimeValue::Boolean(true)) = self.eval_expression(condition) {
+                    for statement in true_block {
+                        self.eval_statement(statement);
+                    }
                 }
             }
         }
