@@ -118,6 +118,7 @@ impl ops::Not for RuntimeValue {
 pub struct Interpreter {
     variables: HashMap<String, RuntimeValue>,
     constants: HashMap<String, RuntimeValue>,
+    quidditch: bool,
     is_lumos_casted: bool,
 }
 
@@ -126,6 +127,7 @@ impl Interpreter {
         Self {
             variables: HashMap::new(),
             constants: HashMap::new(),
+            quidditch: false,
             is_lumos_casted: false,
         }
     }
@@ -167,6 +169,19 @@ impl Interpreter {
                         self.eval_statement(statement);
                     }
                 }
+            }
+            Statement::Quidditch(block) => {
+                // dbg!(format!("Quidditch: {:?} {{ ... }}", condition));
+                self.quidditch = true;
+
+                // arc
+                while self.quidditch {
+                    self.eval(Program(block.clone()))
+                }
+            }
+            Statement::Snitch => {
+                // dbg!("Snitch");
+                self.quidditch = false;
             }
         }
     }

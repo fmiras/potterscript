@@ -8,10 +8,18 @@ x = "Agua: " + water
 
 ~Obliviate x
 
-snake = ~Serpensortia
-~Revelio snake
-~Incendio snake
-~Revelio snake
+index = 0
+quidditch {
+  snake = ~Serpensortia
+  ~Revelio snake
+  ~Incendio snake
+  ~Revelio snake
+  ~Engorgio index
+
+  if index == 4 {
+    snitch
+  }
+}
 
 ~Revelio "Waiting 2s"
 ~Inmobolus 2000

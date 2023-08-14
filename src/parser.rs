@@ -96,14 +96,14 @@ fn parse_variable(input: &str) -> IResult<&str, Atom> {
 
 // Expressions
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Expression {
     SpellCast(Spell, Box<Option<Expression>>),
     BinaryOperation(BinaryOperation, Box<Expression>, Box<Expression>),
     Atom(Atom),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Spell {
     Aguamenti,
     AvadaKedabra,
@@ -188,16 +188,20 @@ pub fn parse_binary_operator(input: &str) -> IResult<&str, BinaryOperation> {
 
 // Statements
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Statement {
     VariableAssignment(String, Expression),
     ExpressionStatement(Expression),
     If(Expression, Vec<Statement>, Vec<Statement>),
+    Quidditch(Vec<Statement>),
+    Snitch,
 }
 
 fn parse_statement(input: &str) -> IResult<&str, Statement> {
     let parser_content = alt((
         parse_if_statement,
+        parse_snitch_statement,
+        parse_quidditch_statement,
         parse_variable_assignment,
         parse_expression_statement,
     ));
@@ -241,6 +245,21 @@ fn parse_if_statement(input: &str) -> IResult<&str, Statement> {
             Statement::If(cond, true_block, else_block.unwrap_or(vec![]))
         },
     )(input)
+}
+
+fn parse_quidditch_statement(input: &str) -> IResult<&str, Statement> {
+    let parse_quidditch = preceded(multispace0, terminated(tag("quidditch"), multispace0));
+    let parse_block = delimited(char('{'), many1(parse_statement), char('}'));
+
+    map(preceded(parse_quidditch, parse_block), |block| {
+        Statement::Quidditch(block)
+    })(input)
+}
+
+fn parse_snitch_statement(input: &str) -> IResult<&str, Statement> {
+    let parse_snitch = preceded(multispace0, terminated(tag("snitch"), multispace0));
+
+    map(parse_snitch, |_| Statement::Snitch)(input)
 }
 
 // Program
@@ -526,6 +545,28 @@ mod tests {
             ],
         );
         let (_, actual) = parse_if_statement(input).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_parse_quidditch() {
+        let input = "quidditch {
+  ~Engorgio x
+  snitch
+  ~Revelio x
+}";
+        let expected = Statement::Quidditch(vec![
+            Statement::ExpressionStatement(Expression::SpellCast(
+                Spell::Engorgio,
+                Box::new(Some(Atom::Variable("x".to_string()).into())),
+            )),
+            Statement::Snitch,
+            Statement::ExpressionStatement(Expression::SpellCast(
+                Spell::Revelio,
+                Box::new(Some(Atom::Variable("x".to_string()).into())),
+            )),
+        ]);
+        let (_, actual) = parse_quidditch_statement(input).unwrap();
         assert_eq!(expected, actual);
     }
 
