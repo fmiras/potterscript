@@ -205,6 +205,7 @@ impl Interpreter {
                 }
             }
             Expression::Atom(atom) => Some(self.eval_atom(atom)),
+            Expression::Comment(_) => None,
         }
     }
 

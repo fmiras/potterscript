@@ -1,4 +1,4 @@
-~Periculum
+~Periculum # Shoot some flares!
 ~Revelio "Hello, world!"
 ~Revelio 4
 
@@ -12,7 +12,7 @@ x = "Agua: " + water
 
 z = ~WingardiumLeviosa "hola"
 ~Revelio z
-z = ~Incendio "hola"
+z = ~Incendio "hola" # This is a comment
 ~Revelio z
 
 index = 0
@@ -24,7 +24,7 @@ quidditch {
   ~Engorgio index
 
   if index == 4 {
-    snitch
+    snitch # Break loop
   }
 }
 

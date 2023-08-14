@@ -2,7 +2,7 @@ use std::fmt;
 
 use nom::{
     branch::alt,
-    bytes::complete::{tag, take_until},
+    bytes::complete::{tag, take_till, take_until},
     character::complete::{alpha0, alpha1, char, i64, multispace0},
     combinator::{map, opt},
     multi::many1,
@@ -142,6 +142,7 @@ pub enum Expression {
     SpellCast(Spell, Box<Option<Expression>>),
     BinaryOperation(BinaryOperation, Box<Expression>, Box<Expression>),
     Atom(Atom),
+    Comment(String),
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -176,7 +177,12 @@ pub enum BinaryOperation {
 pub fn parse_expression(input: &str) -> IResult<&str, Expression> {
     // dbg!("parse_expression");
     // dbg!(input);
-    alt((parse_spell_cast, parse_binary_operation, parse_atom))(input)
+    alt((
+        parse_comment,
+        parse_spell_cast,
+        parse_binary_operation,
+        parse_atom,
+    ))(input)
 }
 
 pub fn parse_spell_cast(input: &str) -> IResult<&str, Expression> {
@@ -216,6 +222,13 @@ pub fn parse_binary_operation(input: &str) -> IResult<&str, Expression> {
 
     let expression = Expression::BinaryOperation(op, Box::new(left), Box::new(right));
     Ok((rest, expression))
+}
+
+pub fn parse_comment(input: &str) -> IResult<&str, Expression> {
+    map(
+        preceded(char('#'), take_till(|c| c == '\n')),
+        |comment: &str| Expression::Comment(comment.to_string()),
+    )(input)
 }
 
 pub fn parse_binary_operator(input: &str) -> IResult<&str, BinaryOperation> {
@@ -488,6 +501,14 @@ mod tests {
             Box::new(Atom::Integer(4).into()),
         );
         let (_, actual) = parse_binary_operation(input).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_parse_comment() {
+        let input = "# Hello, world!";
+        let expected = Expression::Comment(" Hello, world!".to_string());
+        let (_, actual) = parse_comment(input).unwrap();
         assert_eq!(expected, actual);
     }
 
