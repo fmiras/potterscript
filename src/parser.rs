@@ -1,3 +1,5 @@
+use std::fmt;
+
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_until},
@@ -20,6 +22,26 @@ pub enum Atom {
     Boolean(bool),
     Integer(i64),
     Double(f64),
+    HogwartsHouse(HogwartsHouse),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum HogwartsHouse {
+    Gryffindor,
+    Hufflepuff,
+    Ravenclaw,
+    Slytherin,
+}
+
+impl fmt::Display for HogwartsHouse {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            HogwartsHouse::Gryffindor => write!(f, "Gryffindor"),
+            HogwartsHouse::Hufflepuff => write!(f, "Hufflepuff"),
+            HogwartsHouse::Ravenclaw => write!(f, "Ravenclaw"),
+            HogwartsHouse::Slytherin => write!(f, "Slytherin"),
+        }
+    }
 }
 
 impl Atom {
@@ -30,6 +52,7 @@ impl Atom {
             Atom::Double(float) => float.to_string(),
             Atom::String(string) => string.to_string(),
             Atom::Variable(var) => var.to_string(),
+            Atom::HogwartsHouse(house) => house.to_string(),
         }
     }
 }
@@ -48,6 +71,7 @@ impl From<Atom> for RuntimeValue {
             Atom::Double(float) => RuntimeValue::Double(float),
             Atom::String(string) => RuntimeValue::String(string),
             Atom::Variable(var) => panic!("Cannot convert variable to RuntimeValue: {}", var),
+            Atom::HogwartsHouse(house) => RuntimeValue::HogwartsHouse(house),
         }
     }
 }
@@ -55,6 +79,7 @@ impl From<Atom> for RuntimeValue {
 fn parse_atom(input: &str) -> IResult<&str, Expression> {
     let parser = alt((
         parse_boolean,
+        parse_hogwarts_house,
         parse_double,
         parse_integer,
         parse_string,
@@ -92,6 +117,22 @@ fn parse_string(input: &str) -> IResult<&str, Atom> {
 
 fn parse_variable(input: &str) -> IResult<&str, Atom> {
     map(alpha1, |var: &str| Atom::Variable(var.to_string()))(input)
+}
+
+fn parse_hogwarts_house(input: &str) -> IResult<&str, Atom> {
+    let parser = alt((
+        tag("Gryffindor"),
+        tag("Hufflepuff"),
+        tag("Ravenclaw"),
+        tag("Slytherin"),
+    ));
+    map(parser, |house: &str| match house {
+        "Gryffindor" => Atom::HogwartsHouse(HogwartsHouse::Gryffindor),
+        "Hufflepuff" => Atom::HogwartsHouse(HogwartsHouse::Hufflepuff),
+        "Ravenclaw" => Atom::HogwartsHouse(HogwartsHouse::Ravenclaw),
+        "Slytherin" => Atom::HogwartsHouse(HogwartsHouse::Slytherin),
+        _ => panic!("Unknown Hogwarts house: {}", house),
+    })(input)
 }
 
 // Expressions
@@ -322,6 +363,14 @@ mod tests {
         let input = "123";
         let expected = Atom::Integer(123);
         let (_, actual) = parse_integer(input).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_parse_hogwarts_house() {
+        let input = "Gryffindor";
+        let expected = Atom::HogwartsHouse(HogwartsHouse::Gryffindor);
+        let (_, actual) = parse_hogwarts_house(input).unwrap();
         assert_eq!(expected, actual);
     }
 

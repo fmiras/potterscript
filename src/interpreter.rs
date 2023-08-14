@@ -12,6 +12,7 @@ pub enum RuntimeValue {
     Double(f64),
     Boolean(bool),
     String(String),
+    HogwartsHouse(HogwartsHouse),
 }
 
 impl fmt::Display for RuntimeValue {
@@ -21,6 +22,7 @@ impl fmt::Display for RuntimeValue {
             RuntimeValue::Double(value) => write!(f, "{}", value),
             RuntimeValue::Boolean(value) => write!(f, "{}", value),
             RuntimeValue::String(value) => write!(f, "{}", value),
+            RuntimeValue::HogwartsHouse(value) => write!(f, "{:?}", value),
         }
     }
 }
