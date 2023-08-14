@@ -156,10 +156,14 @@ impl Interpreter {
                 dbg!(format!("ExpressionStatement: {:?}", expression));
                 self.eval_expression(expression);
             }
-            Statement::If(condition, true_block) => {
+            Statement::If(condition, true_block, else_block) => {
                 dbg!(format!("If: {:?} {{ ... }}", condition));
                 if let Some(RuntimeValue::Boolean(true)) = self.eval_expression(condition) {
                     for statement in true_block {
+                        self.eval_statement(statement);
+                    }
+                } else {
+                    for statement in else_block {
                         self.eval_statement(statement);
                     }
                 }

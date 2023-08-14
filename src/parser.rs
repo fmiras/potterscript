@@ -5,7 +5,7 @@ use nom::{
     combinator::{map, opt},
     multi::many1,
     number::complete::double,
-    sequence::{delimited, pair, preceded, terminated, tuple},
+    sequence::{delimited, preceded, terminated, tuple},
     IResult,
 };
 
@@ -174,12 +174,12 @@ pub fn parse_binary_operator(input: &str) -> IResult<&str, BinaryOperation> {
 pub enum Statement {
     VariableAssignment(String, Expression),
     ExpressionStatement(Expression),
-    If(Expression, Vec<Statement>),
+    If(Expression, Vec<Statement>, Vec<Statement>),
 }
 
 fn parse_statement(input: &str) -> IResult<&str, Statement> {
     let parser_content = alt((
-        parse_if,
+        parse_if_statement,
         parse_variable_assignment,
         parse_expression_statement,
     ));
@@ -206,13 +206,22 @@ fn parse_expression_statement(input: &str) -> IResult<&str, Statement> {
     Ok((rest, statement))
 }
 
-fn parse_if(input: &str) -> IResult<&str, Statement> {
+fn parse_if_statement(input: &str) -> IResult<&str, Statement> {
+    let parse_if = preceded(multispace0, terminated(tag("if"), multispace0));
     let parse_condition = preceded(multispace0, terminated(parse_expression, multispace0));
-    let parse_block = delimited(char('{'), many1(parse_statement), char('}'));
+    let parse_true_block = delimited(char('{'), many1(parse_statement), char('}'));
+    let parse_else = preceded(multispace0, terminated(tag("else"), multispace0));
+    let parse_false_block = delimited(char('{'), many1(parse_statement), char('}'));
 
     map(
-        pair(preceded(tag("if"), parse_condition), parse_block),
-        |(cond, true_block)| Statement::If(cond, true_block),
+        tuple((
+            preceded(parse_if, parse_condition),
+            parse_true_block,
+            opt(delimited(parse_else, parse_false_block, multispace0)),
+        )),
+        |(cond, true_block, else_block)| {
+            Statement::If(cond, true_block, else_block.unwrap_or(vec![]))
+        },
     )(input)
 }
 
@@ -438,8 +447,9 @@ mod tests {
                 Spell::Revelio,
                 Box::new(Some(Atom::Integer(4).into())),
             ))],
+            vec![],
         );
-        let (_, actual) = parse_if(input).unwrap();
+        let (_, actual) = parse_if_statement(input).unwrap();
         assert_eq!(expected, actual);
     }
 
@@ -465,8 +475,39 @@ mod tests {
                     Box::new(None),
                 )),
             ],
+            vec![],
         );
-        let (_, actual) = parse_if(input).unwrap();
+        let (_, actual) = parse_if_statement(input).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_parse_if_with_else() {
+        let input = "if y != 11 {
+  ~Revelio \"y is not 11\" 
+} else {
+  ~Lumus
+  ~Revelio \"y is 11\" 
+}";
+        let expected = Statement::If(
+            Expression::BinaryOperation(
+                BinaryOperation::NotEqual,
+                Box::new(Atom::Variable("y".to_string()).into()),
+                Box::new(Atom::Integer(11).into()),
+            ),
+            vec![Statement::ExpressionStatement(Expression::SpellCast(
+                Spell::Revelio,
+                Box::new(Some(Atom::String("y is not 11".to_string()).into())),
+            ))],
+            vec![
+                Statement::ExpressionStatement(Expression::SpellCast(Spell::Lumus, Box::new(None))),
+                Statement::ExpressionStatement(Expression::SpellCast(
+                    Spell::Revelio,
+                    Box::new(Some(Atom::String("y is 11".to_string()).into())),
+                )),
+            ],
+        );
+        let (_, actual) = parse_if_statement(input).unwrap();
         assert_eq!(expected, actual);
     }
 
