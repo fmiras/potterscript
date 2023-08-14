@@ -1,7 +1,11 @@
 [package]
 name = "potterscript"
+description = "The Wizarding World Programming Language"
+authors = ["Federico Miras <miras.federico@gmail.com>"]
+repository = "https://github.com/fmiras/potterscript"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
 
 [dependencies]
 colored = "1.1.0"

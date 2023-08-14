@@ -1,5 +1,5 @@
-# 🧙 PotterScript: The Wizarding World Language
-Parody Programming Language based in Harry Potter (Wizarding World). Experience the magical world of coding like never before!
+# 🧙 PotterScript: The Wizarding World Programming Language
+Esoteric Parody Programming Language based in Harry Potter (Wizarding World). Experience the magical world of coding like never before!
 
 ## ✨ Introduction
 Ever wished you could speak the magical language of wizards and witches? PotterScript is your enchanted gateway to code with the charm and mystery of the Wizarding World.
