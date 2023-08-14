@@ -1,6 +1,6 @@
-use core::panic;
+use core::{panic, time};
 use std::collections::HashMap;
-use std::{fmt, ops};
+use std::{fmt, ops, thread};
 
 use colored::Colorize;
 
@@ -118,7 +118,7 @@ impl ops::Not for RuntimeValue {
 pub struct Interpreter {
     variables: HashMap<String, RuntimeValue>,
     constants: HashMap<String, RuntimeValue>,
-    is_lumus_casted: bool,
+    is_lumos_casted: bool,
 }
 
 impl Interpreter {
@@ -126,7 +126,7 @@ impl Interpreter {
         Self {
             variables: HashMap::new(),
             constants: HashMap::new(),
-            is_lumus_casted: false,
+            is_lumos_casted: false,
         }
     }
 
@@ -143,7 +143,7 @@ impl Interpreter {
                     panic!("Cannot re-assign a constant!");
                 }
 
-                dbg!(format!("VariableAssignment: {:?} = {:?}", name, value));
+                // dbg!(format!("VariableAssignment: {:?} = {:?}", name, value));
                 let evaluated_value = self.eval_expression(value);
 
                 if let Some(evaluated_value) = evaluated_value {
@@ -153,11 +153,11 @@ impl Interpreter {
                 }
             }
             Statement::ExpressionStatement(expression) => {
-                dbg!(format!("ExpressionStatement: {:?}", expression));
+                // dbg!(format!("ExpressionStatement: {:?}", expression));
                 self.eval_expression(expression);
             }
             Statement::If(condition, true_block, else_block) => {
-                dbg!(format!("If: {:?} {{ ... }}", condition));
+                // dbg!(format!("If: {:?} {{ ... }}", condition));
                 if let Some(RuntimeValue::Boolean(true)) = self.eval_expression(condition) {
                     for statement in true_block {
                         self.eval_statement(statement);
@@ -200,22 +200,117 @@ impl Interpreter {
             Spell::AvadaKedabra => {
                 panic!();
             }
+            Spell::Inmobolus => match *target {
+                Some(Expression::Atom(Atom::Integer(number))) => {
+                    let ms = time::Duration::from_millis(number as u64);
+                    thread::sleep(ms);
+                    None
+                }
+                _ => None,
+            },
+            Spell::Incendio => match *target {
+                Some(Expression::Atom(Atom::Variable(var_name))) => {
+                    let value = self
+                        .variables
+                        .get(&var_name)
+                        .cloned()
+                        .expect(format!("Variable {} not found", var_name).as_str());
+                    match value {
+                        RuntimeValue::String(string) => {
+                            self.variables
+                                .insert(var_name, RuntimeValue::String(string + "🔥"));
+                        }
+                        _ => panic!("Cannot Incendio {:?}", value),
+                    }
+                    None
+                }
+                _ => None,
+            },
+            Spell::Aguamenti => RuntimeValue::String("💦".to_string()).into(),
+            Spell::OculusReparo => RuntimeValue::String("👓".to_string()).into(),
+            Spell::Serpensortia => RuntimeValue::String("🐍".to_string()).into(),
             Spell::Periculum => {
                 println!("🔥🔥🔥🔥🔥🔥🔥🔥🔥");
                 None
             }
-            Spell::Lumus => {
-                self.is_lumus_casted = true;
+            Spell::Lumos => {
+                self.is_lumos_casted = true;
                 None
             }
-
+            Spell::Nox => {
+                self.is_lumos_casted = false;
+                None
+            }
+            Spell::Engorgio => match *target {
+                Some(Expression::Atom(Atom::Variable(var_name))) => {
+                    let value = self
+                        .variables
+                        .get(&var_name)
+                        .cloned()
+                        .expect(format!("Variable {} not found", var_name).as_str());
+                    match value {
+                        RuntimeValue::Integer(value) => {
+                            self.variables
+                                .insert(var_name, RuntimeValue::Integer(value + 1));
+                        }
+                        RuntimeValue::Double(value) => {
+                            self.variables
+                                .insert(var_name, RuntimeValue::Double(value + 1.0));
+                        }
+                        RuntimeValue::String(string) => {
+                            self.variables.insert(
+                                var_name,
+                                RuntimeValue::String(string.to_ascii_uppercase()),
+                            );
+                        }
+                        _ => panic!("Cannot increment {:?}", value),
+                    }
+                    None
+                }
+                _ => None,
+            },
+            Spell::Reducio => match *target {
+                Some(Expression::Atom(Atom::Variable(var_name))) => {
+                    let value = self
+                        .variables
+                        .get(&var_name)
+                        .cloned()
+                        .expect(format!("Variable {} not found", var_name).as_str());
+                    match value {
+                        RuntimeValue::Integer(value) => {
+                            self.variables
+                                .insert(var_name, RuntimeValue::Integer(value - 1));
+                        }
+                        RuntimeValue::Double(value) => {
+                            self.variables
+                                .insert(var_name, RuntimeValue::Double(value - 1.0));
+                        }
+                        RuntimeValue::String(string) => {
+                            self.variables.insert(
+                                var_name,
+                                RuntimeValue::String(string.to_ascii_lowercase()),
+                            );
+                        }
+                        _ => panic!("Cannot decrement {:?}", value),
+                    }
+                    None
+                }
+                _ => None,
+            },
+            Spell::Obliviate => match *target {
+                Some(Expression::Atom(Atom::Variable(var_name))) => {
+                    self.variables.remove(&var_name);
+                    None
+                }
+                _ => None,
+            },
             Spell::Revelio => match *target {
                 Some(target) => {
                     let mut string_target: String = self
                         .eval_expression(target)
                         .unwrap_or(RuntimeValue::String("".to_string()))
                         .to_string();
-                    if self.is_lumus_casted {
+                    if self.is_lumos_casted {
                         string_target = string_target.black().on_white().to_string();
                     }
                     println!("{}", string_target);
@@ -224,7 +319,6 @@ impl Interpreter {
                 None => None,
             },
             Spell::PetrificusTotalus => match *target {
-                // pattern match Expression::Atom(Atom::Variable(var_name))
                 Some(Expression::Atom(Atom::Variable(var_name))) => {
                     let value = self.variables.remove(&var_name);
                     if let Some(value) = value {

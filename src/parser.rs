@@ -105,11 +105,20 @@ pub enum Expression {
 
 #[derive(Debug, PartialEq)]
 pub enum Spell {
+    Aguamenti,
     AvadaKedabra,
-    Revelio,
+    Engorgio,
+    Incendio,
+    Inmobolus,
+    Lumos,
+    Nox,
+    Obliviate,
+    OculusReparo,
     Periculum,
-    Lumus,
+    Reducio,
     PetrificusTotalus,
+    Revelio,
+    Serpensortia,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone)]
@@ -123,8 +132,8 @@ pub enum BinaryOperation {
 }
 
 pub fn parse_expression(input: &str) -> IResult<&str, Expression> {
-    dbg!("parse_expression");
-    dbg!(input);
+    // dbg!("parse_expression");
+    // dbg!(input);
     alt((parse_spell_cast, parse_binary_operation, parse_atom))(input)
 }
 
@@ -136,10 +145,19 @@ pub fn parse_spell_cast(input: &str) -> IResult<&str, Expression> {
 
     map(parser, |(spell, target)| match spell {
         "AvadaKedabra" => Expression::SpellCast(Spell::AvadaKedabra, Box::new(target)),
-        "Revelio" => Expression::SpellCast(Spell::Revelio, Box::new(target)),
+        "Aguamenti" => Expression::SpellCast(Spell::Aguamenti, Box::new(target)),
+        "Engorgio" => Expression::SpellCast(Spell::Engorgio, Box::new(target)),
+        "Incendio" => Expression::SpellCast(Spell::Incendio, Box::new(target)),
+        "Inmobolus" => Expression::SpellCast(Spell::Inmobolus, Box::new(target)),
+        "Lumos" => Expression::SpellCast(Spell::Lumos, Box::new(target)),
+        "Nox" => Expression::SpellCast(Spell::Nox, Box::new(target)),
+        "Obliviate" => Expression::SpellCast(Spell::Obliviate, Box::new(target)),
+        "OculusReparo" => Expression::SpellCast(Spell::OculusReparo, Box::new(target)),
         "Periculum" => Expression::SpellCast(Spell::Periculum, Box::new(target)),
-        "Lumus" => Expression::SpellCast(Spell::Lumus, Box::new(target)),
+        "Reducio" => Expression::SpellCast(Spell::Reducio, Box::new(target)),
         "PetrificusTotalus" => Expression::SpellCast(Spell::PetrificusTotalus, Box::new(target)),
+        "Revelio" => Expression::SpellCast(Spell::Revelio, Box::new(target)),
+        "Serpensortia" => Expression::SpellCast(Spell::Serpensortia, Box::new(target)),
         _ => panic!("Wand broken: Unknown spell: {}", spell),
     })(input)
 }
@@ -486,7 +504,7 @@ mod tests {
         let input = "if y != 11 {
   ~Revelio \"y is not 11\" 
 } else {
-  ~Lumus
+  ~Lumos
   ~Revelio \"y is 11\" 
 }";
         let expected = Statement::If(
@@ -500,7 +518,7 @@ mod tests {
                 Box::new(Some(Atom::String("y is not 11".to_string()).into())),
             ))],
             vec![
-                Statement::ExpressionStatement(Expression::SpellCast(Spell::Lumus, Box::new(None))),
+                Statement::ExpressionStatement(Expression::SpellCast(Spell::Lumos, Box::new(None))),
                 Statement::ExpressionStatement(Expression::SpellCast(
                     Spell::Revelio,
                     Box::new(Some(Atom::String("y is 11".to_string()).into())),

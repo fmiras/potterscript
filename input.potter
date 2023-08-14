@@ -1,20 +1,40 @@
 ~Periculum
 ~Revelio "Hello, world!"
 
-x = "hola" + "asd"
+water = ~Aguamenti
+x = "Agua: " + water
+~Engorgio x
 ~Revelio x
 
-y = 3 + 8
+~Obliviate x
+
+snake = ~Serpensortia
+~Revelio snake
+~Incendio snake
+~Revelio snake
+
+~Revelio "Waiting 2s"
+~Inmobolus 2000
+
+y = 3 + 7
+~Engorgio y
 ~Revelio y
 
 if y != 11 {
   ~Revelio "y is not 11" 
 } else {
-  ~Lumus
+  ~Lumos
   ~Revelio "y is 11" 
 }
 
 y = 8
+
+~Nox
+~Engorgio y
+~Engorgio y
+~Engorgio y
+~Reducio y
+~Revelio y
 
 ~PetrificusTotalus y
 
