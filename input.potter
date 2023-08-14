@@ -1,12 +1,19 @@
 ~Periculum
 ~Revelio "Hello, world!"
+~Revelio 4
 
 water = ~Aguamenti
 x = "Agua: " + water
 ~Engorgio x
+~WingardiumLeviosa x
 ~Revelio x
 
 ~Obliviate x
+
+z = ~WingardiumLeviosa "hola"
+~Revelio z
+z = ~Incendio "hola"
+~Revelio z
 
 index = 0
 quidditch {

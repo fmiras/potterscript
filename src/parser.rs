@@ -160,6 +160,7 @@ pub enum Spell {
     PetrificusTotalus,
     Revelio,
     Serpensortia,
+    WingardiumLeviosa,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone)]
@@ -199,6 +200,7 @@ pub fn parse_spell_cast(input: &str) -> IResult<&str, Expression> {
         "PetrificusTotalus" => Expression::SpellCast(Spell::PetrificusTotalus, Box::new(target)),
         "Revelio" => Expression::SpellCast(Spell::Revelio, Box::new(target)),
         "Serpensortia" => Expression::SpellCast(Spell::Serpensortia, Box::new(target)),
+        "WingardiumLeviosa" => Expression::SpellCast(Spell::WingardiumLeviosa, Box::new(target)),
         _ => panic!("Wand broken: Unknown spell: {}", spell),
     })(input)
 }

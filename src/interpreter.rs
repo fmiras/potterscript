@@ -241,6 +241,9 @@ impl Interpreter {
                     }
                     None
                 }
+                Some(Expression::Atom(Atom::String(string))) => {
+                    Some(RuntimeValue::String(string + "🔥"))
+                }
                 _ => None,
             },
             Spell::Aguamenti => RuntimeValue::String("💦".to_string()).into(),
@@ -342,6 +345,27 @@ impl Interpreter {
                         self.constants.insert(var_name, value);
                     }
                     None
+                }
+                _ => None,
+            },
+            Spell::WingardiumLeviosa => match *target {
+                Some(Expression::Atom(Atom::Variable(var_name))) => {
+                    let value = self
+                        .variables
+                        .get(&var_name)
+                        .cloned()
+                        .expect(format!("Variable {} not found", var_name).as_str());
+                    match value {
+                        RuntimeValue::String(string) => {
+                            self.variables
+                                .insert(var_name, RuntimeValue::String(string + "\n"));
+                        }
+                        _ => panic!("Cannot WingardiumLeviosa {:?}", value),
+                    }
+                    None
+                }
+                Some(Expression::Atom(Atom::String(string))) => {
+                    Some(RuntimeValue::String(string + "\n"))
                 }
                 _ => None,
             },
