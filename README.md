@@ -12,11 +12,11 @@ Powered by Rust and its incredible features like godlike error handling and orga
 ### Spell Functions
 Cast spells with your virtual wand and experience these magical functions:
 
-**Memory Management:** Use `~Obliviate` to clear memory.
-**System Calls:** Execute `~AvadaKedabra` to exit processes.
-**Magical Expressions:** Perform magical operations like `~Engorgio {integer}` to increment numbers.
-**Visual Spells:** Create visual effects like `~Lumos` to print with black letters on a white background.
-**Emotional Spells:** Feel the power of `~Sectumsempra` that returns "🐍", and many more!
+- **Memory Management:** Use `~Obliviate` to clear memory.
+- **System Calls:** Execute `~AvadaKedabra` to exit processes.
+- **Magical Expressions:** Perform magical operations like `~Engorgio {integer}` to increment numbers.
+- **Visual Spells:** Create visual effects like `~Lumos` to print with black letters on a white background.
+- **Emotional Spells:** Feel the power of `~Sectumsempra` that returns "🐍", and many more!
 A detailed list of spell functions can be found [here](src/parser.rs#L150).
 
 ### Quidditch Loops
