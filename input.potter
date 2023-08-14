@@ -2,6 +2,12 @@
 ~Revelio "Hello, world!"
 ~Revelio 4
 
+house = 🎩✨
+~Revelio house
+if house == Gryffindor {
+  ~Periculum
+}
+
 water = ~Aguamenti
 x = "Agua: " + water
 ~Engorgio x

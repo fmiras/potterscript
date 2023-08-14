@@ -25,7 +25,7 @@ pub enum Atom {
     HogwartsHouse(HogwartsHouse),
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum HogwartsHouse {
     Gryffindor,
     Hufflepuff,
@@ -143,6 +143,7 @@ pub enum Expression {
     BinaryOperation(BinaryOperation, Box<Expression>, Box<Expression>),
     Atom(Atom),
     Comment(String),
+    SortingHat,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -178,11 +179,18 @@ pub fn parse_expression(input: &str) -> IResult<&str, Expression> {
     // dbg!("parse_expression");
     // dbg!(input);
     alt((
+        parse_sorting_hat,
         parse_comment,
         parse_spell_cast,
         parse_binary_operation,
         parse_atom,
     ))(input)
+}
+
+pub fn parse_sorting_hat(input: &str) -> IResult<&str, Expression> {
+    map(alt((tag("SortingHat"), tag("🎩✨"))), |_| {
+        Expression::SortingHat
+    })(input)
 }
 
 pub fn parse_spell_cast(input: &str) -> IResult<&str, Expression> {
@@ -509,6 +517,14 @@ mod tests {
         let input = "# Hello, world!";
         let expected = Expression::Comment(" Hello, world!".to_string());
         let (_, actual) = parse_comment(input).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_sorting_hat() {
+        let input = "🎩✨";
+        let expected = Expression::SortingHat;
+        let (_, actual) = parse_sorting_hat(input).unwrap();
         assert_eq!(expected, actual);
     }
 

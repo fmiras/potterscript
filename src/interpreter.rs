@@ -3,6 +3,8 @@ use std::collections::HashMap;
 use std::{fmt, ops, process, thread};
 
 use colored::Colorize;
+use rand::Rng;
+use rand::{random, thread_rng};
 
 use crate::parser::*;
 
@@ -206,6 +208,19 @@ impl Interpreter {
             }
             Expression::Atom(atom) => Some(self.eval_atom(atom)),
             Expression::Comment(_) => None,
+            Expression::SortingHat => {
+                let houses = vec![
+                    HogwartsHouse::Gryffindor,
+                    HogwartsHouse::Hufflepuff,
+                    HogwartsHouse::Ravenclaw,
+                    HogwartsHouse::Slytherin,
+                ];
+                let mut rng = rand::thread_rng();
+                let index: usize = rng.gen_range(0..=3);
+
+                let random_house = houses[index];
+                Some(RuntimeValue::HogwartsHouse(random_house.clone()))
+            }
         }
     }
 
