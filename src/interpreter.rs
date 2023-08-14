@@ -1,6 +1,6 @@
 use core::{panic, time};
 use std::collections::HashMap;
-use std::{fmt, ops, thread};
+use std::{fmt, ops, process, thread};
 
 use colored::Colorize;
 
@@ -215,9 +215,7 @@ impl Interpreter {
         target: Box<Option<Expression>>,
     ) -> Option<RuntimeValue> {
         match spell {
-            Spell::AvadaKedabra => {
-                panic!();
-            }
+            Spell::AvadaKedabra => process::exit(0),
             Spell::Inmobolus => match *target {
                 Some(Expression::Atom(Atom::Integer(number))) => {
                     let ms = time::Duration::from_millis(number as u64);
