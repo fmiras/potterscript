@@ -43,6 +43,7 @@ Generate `HogwartsHouse` values (is a type like String or Integer), using the So
 
 ```potter
 house = 🎩✨ # or SortingHat
+
 if house = Griffindor {
   ~Periculum
 }
@@ -52,7 +53,10 @@ if house = Griffindor {
 PotterScript utilizes Rust's excellent [nom](https://github.com/rust-bakery/nom) library to create custom parsers.
 
 ## 🚀 Get Started
-Ready to embark on this magical journey? Follow the Installation Guide to set up PotterScript on your system.
+Ready to embark on this magical journey? Run the following to eval `input.potter` file and use the REPL program:
+```bash
+cargo run
+```
 
 ## 📜 License
 Licensed under the MIT License. See [LICENSE](LICENSE.md) for more details.
