@@ -4,7 +4,6 @@ use std::{fmt, ops, process, thread};
 
 use colored::Colorize;
 use rand::Rng;
-use rand::{random, thread_rng};
 
 use crate::parser::*;
 
