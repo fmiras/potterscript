@@ -3,9 +3,10 @@ use std::collections::HashMap;
 use std::{fmt, ops, process, thread};
 
 use colored::Colorize;
+use potterscript_parser::{
+    Atom, BinaryOperation, Expression, HogwartsHouse, Program, Spell, Statement,
+};
 use rand::Rng;
-
-use crate::parser::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum RuntimeValue {
@@ -14,6 +15,19 @@ pub enum RuntimeValue {
     Boolean(bool),
     String(String),
     HogwartsHouse(HogwartsHouse),
+}
+
+impl From<Atom> for RuntimeValue {
+    fn from(atom: Atom) -> Self {
+        match atom {
+            Atom::Boolean(boolean) => RuntimeValue::Boolean(boolean),
+            Atom::Integer(integer) => RuntimeValue::Integer(integer),
+            Atom::Double(float) => RuntimeValue::Double(float),
+            Atom::String(string) => RuntimeValue::String(string),
+            Atom::Variable(var) => panic!("Cannot convert variable to RuntimeValue: {}", var),
+            Atom::HogwartsHouse(house) => RuntimeValue::HogwartsHouse(house),
+        }
+    }
 }
 
 impl fmt::Display for RuntimeValue {

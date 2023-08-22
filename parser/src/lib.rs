@@ -11,8 +11,6 @@ use nom::{
     IResult,
 };
 
-use crate::interpreter::RuntimeValue;
-
 // Atoms
 
 #[derive(Debug, PartialEq, Clone)]
@@ -60,19 +58,6 @@ impl Atom {
 impl From<Atom> for Expression {
     fn from(atom: Atom) -> Self {
         Expression::Atom(atom)
-    }
-}
-
-impl From<Atom> for RuntimeValue {
-    fn from(atom: Atom) -> Self {
-        match atom {
-            Atom::Boolean(boolean) => RuntimeValue::Boolean(boolean),
-            Atom::Integer(integer) => RuntimeValue::Integer(integer),
-            Atom::Double(float) => RuntimeValue::Double(float),
-            Atom::String(string) => RuntimeValue::String(string),
-            Atom::Variable(var) => panic!("Cannot convert variable to RuntimeValue: {}", var),
-            Atom::HogwartsHouse(house) => RuntimeValue::HogwartsHouse(house),
-        }
     }
 }
 

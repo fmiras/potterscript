@@ -1,0 +1,8 @@
+[package]
+name = "potterscript-parser"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+nom = "7.1.3"
+

@@ -124,12 +124,27 @@ dependencies = [
 ]
 
 [[package]]
-name = "potterscript"
+name = "potterscript-example"
+version = "0.1.0"
+dependencies = [
+ "potterscript-interpreter",
+ "potterscript-parser",
+]
+
+[[package]]
+name = "potterscript-interpreter"
 version = "0.1.0"
 dependencies = [
  "colored",
- "nom",
+ "potterscript-parser",
  "rand",
+]
+
+[[package]]
+name = "potterscript-parser"
+version = "0.1.0"
+dependencies = [
+ "nom",
 ]
 
 [[package]]

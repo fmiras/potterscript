@@ -1,0 +1,10 @@
+[package]
+name = "potterscript-interpreter"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+potterscript-parser = { path = "../parser" }
+colored = "1.1.0"
+rand = "0.8.4"
+
