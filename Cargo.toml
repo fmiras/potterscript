@@ -2,7 +2,8 @@
 members = [
   "parser",
   "interpreter",
-  "example"
+  "example",
+  "ron"
 ]
 
 [workspace.package]

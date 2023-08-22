@@ -1,0 +1,10 @@
+[package]
+name = "potterscript-ron"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+potterscript-parser = { path = "../parser" }
+potterscript-interpreter = { path = "../interpreter" }
+
+
