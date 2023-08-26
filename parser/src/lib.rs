@@ -10,10 +10,11 @@ use nom::{
     sequence::{delimited, preceded, terminated, tuple},
     IResult,
 };
+use serde::{Deserialize, Serialize};
 
 // Atoms
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Atom {
     String(String),
     Variable(String),
@@ -23,7 +24,7 @@ pub enum Atom {
     HogwartsHouse(HogwartsHouse),
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum HogwartsHouse {
     Gryffindor,
     Hufflepuff,
@@ -122,7 +123,7 @@ fn parse_hogwarts_house(input: &str) -> IResult<&str, Atom> {
 
 // Expressions
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Expression {
     SpellCast(Spell, Box<Option<Expression>>),
     BinaryOperation(BinaryOperation, Box<Expression>, Box<Expression>),
@@ -131,7 +132,7 @@ pub enum Expression {
     SortingHat,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Spell {
     Aguamenti,
     AvadaKedabra,
@@ -150,7 +151,7 @@ pub enum Spell {
     WingardiumLeviosa,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Eq, PartialEq, Clone, Serialize, Deserialize)]
 pub enum BinaryOperation {
     Plus,
     Minus,
@@ -237,7 +238,7 @@ pub fn parse_binary_operator(input: &str) -> IResult<&str, BinaryOperation> {
 
 // Statements
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Statement {
     VariableAssignment(String, Expression),
     ExpressionStatement(Expression),
@@ -313,7 +314,7 @@ fn parse_snitch_statement(input: &str) -> IResult<&str, Statement> {
 
 // Program
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Program(pub Vec<Statement>);
 
 pub fn parse_program(input: &str) -> IResult<&str, Program> {
