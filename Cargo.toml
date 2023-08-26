@@ -3,7 +3,8 @@ members = [
   "parser",
   "interpreter",
   "example",
-  "ron"
+  "ron",
+  "wasm"
 ]
 
 [workspace.package]
