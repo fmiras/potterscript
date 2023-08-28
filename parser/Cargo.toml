@@ -1,5 +1,7 @@
 [package]
 name = "potterscript-parser"
+description = "PotterScript parser."
+license = "MIT"
 version.workspace = true
 edition.workspace = true
 
