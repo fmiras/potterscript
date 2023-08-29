@@ -1,5 +1,3 @@
-use std::io::Write;
-
 fn main() {
     let input = include_str!("../input.potter");
     let (_, program) = potterscript_parser::parse_program(input).unwrap();

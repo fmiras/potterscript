@@ -3,7 +3,10 @@ members = [
   "parser",
   "interpreter",
   "example",
-  "ron",
+  "ron"
+]
+exclude = [
+  "playground",
   "wasm"
 ]
 
