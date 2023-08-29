@@ -9,8 +9,7 @@ pub fn parse_potterscript(code: &str) -> String {
 
 #[test]
 fn test_parse_potterscript() {
-    let code = r#"
-    index = 0
+    let code = r#"index = 0
 
     quidditch {
       snake = ~Serpensortia
