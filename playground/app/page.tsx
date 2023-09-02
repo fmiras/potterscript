@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function PlaygroundPage() {
   return (
     <>
-      <div className="hidden h-full flex-col md:flex">
+      <div className="h-full flex-col md:flex">
         <Header />
         <Separator />
         <Playground />
