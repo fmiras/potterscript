@@ -4,9 +4,9 @@ fn main() {
 
     println!("PotterScript AST: {:#?}", program);
 
-    let mut interpreter = potterscript_interpreter::Interpreter::new();
+    let mut runtime = potterscript_runtime::Runtime::new();
 
     println!("\nRunning PotterScript program...");
-    interpreter.eval(program);
+    runtime.eval(program);
     println!("PotterScript program finished running.");
 }

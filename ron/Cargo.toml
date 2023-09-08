@@ -5,6 +5,6 @@ edition.workspace = true
 
 [dependencies]
 potterscript-parser = { path = "../parser" }
-potterscript-interpreter = { path = "../interpreter" }
+potterscript-runtime = { path = "../runtime" }
 
 

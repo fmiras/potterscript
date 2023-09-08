@@ -127,17 +127,8 @@ dependencies = [
 name = "potterscript-example"
 version = "0.1.0"
 dependencies = [
- "potterscript-interpreter",
  "potterscript-parser",
-]
-
-[[package]]
-name = "potterscript-interpreter"
-version = "0.1.0"
-dependencies = [
- "colored",
- "potterscript-parser",
- "rand",
+ "potterscript-runtime",
 ]
 
 [[package]]
@@ -152,8 +143,17 @@ dependencies = [
 name = "potterscript-ron"
 version = "0.1.0"
 dependencies = [
- "potterscript-interpreter",
  "potterscript-parser",
+ "potterscript-runtime",
+]
+
+[[package]]
+name = "potterscript-runtime"
+version = "0.1.0"
+dependencies = [
+ "colored",
+ "potterscript-parser",
+ "rand",
 ]
 
 [[package]]

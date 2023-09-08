@@ -132,14 +132,14 @@ impl ops::Not for RuntimeValue {
     }
 }
 
-pub struct Interpreter {
+pub struct Runtime {
     variables: HashMap<String, RuntimeValue>,
     constants: HashMap<String, RuntimeValue>,
     quidditch: bool,
     is_lumos_casted: bool,
 }
 
-impl Interpreter {
+impl Runtime {
     pub fn new() -> Self {
         Self {
             variables: HashMap::new(),

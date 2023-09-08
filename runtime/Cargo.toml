@@ -1,5 +1,5 @@
 [package]
-name = "potterscript-interpreter"
+name = "potterscript-runtime"
 version.workspace = true
 edition.workspace = true
 
