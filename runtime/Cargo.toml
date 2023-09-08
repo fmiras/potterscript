@@ -1,10 +1,12 @@
 [package]
 name = "potterscript-runtime"
+description = "PotterScript Runtime."
+license = "MIT"
 version.workspace = true
 edition.workspace = true
 
 [dependencies]
-potterscript-parser = { path = "../parser" }
+potterscript-parser = "0.1.0"
 colored = "1.1.0"
 rand = "0.8.4"
 
