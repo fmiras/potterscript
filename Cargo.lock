@@ -127,8 +127,8 @@ dependencies = [
 name = "potterscript-example"
 version = "0.1.0"
 dependencies = [
- "potterscript-parser",
- "potterscript-runtime",
+ "potterscript-parser 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "potterscript-runtime 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -140,11 +140,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "potterscript-parser"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3d6c5914654bda3afddac4fb16b0da0bf254368c5beb0f69e95f6e8cdbff8eee"
+dependencies = [
+ "nom",
+ "serde",
+]
+
+[[package]]
 name = "potterscript-ron"
 version = "0.1.0"
 dependencies = [
- "potterscript-parser",
- "potterscript-runtime",
+ "potterscript-parser 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "potterscript-runtime 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -152,7 +162,18 @@ name = "potterscript-runtime"
 version = "0.1.0"
 dependencies = [
  "colored",
- "potterscript-parser",
+ "potterscript-parser 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand",
+]
+
+[[package]]
+name = "potterscript-runtime"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7f6417846d848133d0663727199873f20a06c73541f33641871187404125647b"
+dependencies = [
+ "colored",
+ "potterscript-parser 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand",
 ]
 
