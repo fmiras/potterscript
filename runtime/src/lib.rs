@@ -1,6 +1,5 @@
-use core::{panic, time};
 use std::collections::HashMap;
-use std::{fmt, ops, process, thread};
+use std::{fmt, ops, panic, process, thread, time};
 
 use colored::Colorize;
 use potterscript_parser::{
