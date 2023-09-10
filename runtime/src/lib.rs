@@ -1,10 +1,12 @@
 use std::collections::HashMap;
-use std::{fmt, ops, panic, process, thread, time};
+use std::{fmt, ops, panic, process, time};
 
+#[cfg(feature = "std")]
 use colored::Colorize;
 use potterscript_parser::{
     Atom, BinaryOperation, Expression, HogwartsHouse, Program, Spell, Statement,
 };
+#[cfg(feature = "std")]
 use rand::Rng;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -138,6 +140,34 @@ pub struct Runtime {
     is_lumos_casted: bool,
 }
 
+pub trait RuntimeAdapter {
+    fn create_random_index() -> usize;
+    fn lumos(string: String) -> String;
+}
+
+#[cfg(feature = "std")]
+impl RuntimeAdapter for Runtime {
+    fn create_random_index() -> usize {
+        let mut rng = rand::thread_rng();
+        rng.gen_range(0..=3)
+    }
+
+    fn lumos(string: String) -> String {
+        string.black().on_white().to_string()
+    }
+}
+
+#[cfg(feature = "js")]
+impl RuntimeAdapter for Runtime {
+    fn create_random_index() -> usize {
+        js_sys::Math::floor(js_sys::Math::random() * 4.0) as usize
+    }
+
+    fn lumos(string: String) -> String {
+        string
+    }
+}
+
 impl Runtime {
     pub fn new() -> Self {
         Self {
@@ -151,6 +181,17 @@ impl Runtime {
     pub fn eval(&mut self, program: Program) {
         for statement in program.0 {
             self.eval_statement(statement);
+        }
+    }
+
+    fn eval_atom(&self, atom: Atom) -> RuntimeValue {
+        match atom {
+            Atom::Variable(var_name) => self
+                .variables
+                .get(&var_name)
+                .cloned()
+                .expect(format!("Variable {} not found", var_name).as_str()),
+            _ => atom.into(),
         }
     }
 
@@ -227,9 +268,8 @@ impl Runtime {
                     HogwartsHouse::Ravenclaw,
                     HogwartsHouse::Slytherin,
                 ];
-                let mut rng = rand::thread_rng();
-                let index: usize = rng.gen_range(0..=3);
 
+                let index = Self::create_random_index();
                 let random_house = houses[index];
                 Some(RuntimeValue::HogwartsHouse(random_house.clone()))
             }
@@ -245,8 +285,9 @@ impl Runtime {
             Spell::AvadaKedabra => process::exit(0),
             Spell::Inmobolus => match *target {
                 Some(Expression::Atom(Atom::Integer(number))) => {
-                    let ms = time::Duration::from_millis(number as u64);
-                    thread::sleep(ms);
+                    let _ms = time::Duration::from_millis(number as u64);
+                    // TODO add this again when WASM compatible (need to add tokio runtime)
+                    // thread::sleep(ms);
                     None
                 }
                 _ => None,
@@ -268,7 +309,7 @@ impl Runtime {
                     None
                 }
                 Some(Expression::Atom(Atom::String(string))) => {
-                    Some(RuntimeValue::String(string + "🔥"))
+                    Some(RuntimeValue::String(string + "asdasdas🔥"))
                 }
                 _ => None,
             },
@@ -357,7 +398,7 @@ impl Runtime {
                         .unwrap_or(RuntimeValue::String("".to_string()))
                         .to_string();
                     if self.is_lumos_casted {
-                        string_target = string_target.black().on_white().to_string();
+                        string_target = Self::lumos(string_target);
                     }
                     println!("{}", string_target);
                     None
@@ -395,17 +436,6 @@ impl Runtime {
                 }
                 _ => None,
             },
-        }
-    }
-
-    fn eval_atom(&self, atom: Atom) -> RuntimeValue {
-        match atom {
-            Atom::Variable(var_name) => self
-                .variables
-                .get(&var_name)
-                .cloned()
-                .expect(format!("Variable {} not found", var_name).as_str()),
-            _ => atom.into(),
         }
     }
 }

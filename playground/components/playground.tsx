@@ -31,8 +31,9 @@ export function Playground() {
   const handleSubmit = useCallback(
     (e?: React.FormEvent<HTMLFormElement>) => {
       if (e) e.preventDefault()
-      if (loading) return
-      const ast = JSON.parse(wasm.parse_potterscript(code))[1]
+      if (loading || !wasm) return
+      const ast = JSON.parse(wasm.parse(code))[1]
+      wasm.parse_and_run(code)
       setResult(JSON.stringify(ast, null, 2))
     },
     [wasm, code, loading]

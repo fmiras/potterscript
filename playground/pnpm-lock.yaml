@@ -66,8 +66,8 @@ dependencies:
     specifier: 8.4.29
     version: 8.4.29
   potterscript-wasm:
-    specifier: ^0.2.0
-    version: 0.2.0
+    specifier: ^0.2.2
+    version: 0.2.2
   react:
     specifier: 18.2.0
     version: 18.2.0
@@ -2978,8 +2978,8 @@ packages:
       source-map-js: 1.0.2
     dev: false
 
-  /potterscript-wasm@0.2.0:
-    resolution: {integrity: sha512-nsWcFlcRjWL7D8SgwtPNv18rPvxrUOc9cT6wR9/foQE/UxGaphtBLG+g5wEZhj4quv6lHCnJglYiS0brvWWEDQ==}
+  /potterscript-wasm@0.2.2:
+    resolution: {integrity: sha512-+RJb5cgLaodQQYeMN9VNwIAL3/vRUL9SyBC3CBJb2h4ZrtEqfUxM5HCQoTbI7eJFrHXfJlVQ+NIvVl5UmV9IBA==}
     dev: false
 
   /prelude-ls@1.2.1:

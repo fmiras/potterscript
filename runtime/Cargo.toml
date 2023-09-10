@@ -5,8 +5,14 @@ license = "MIT"
 version.workspace = true
 edition.workspace = true
 
-[dependencies]
-potterscript-parser = "0.1.0"
-colored = "1.1.0"
-rand = "0.8.4"
+[features]
+default = ["std"]
+std = ["colored", "rand"]
+js = ["js-sys", "wasm-bindgen"]
 
+[dependencies]
+potterscript-parser = { version = "0.1.0", path = "../parser" }
+colored = {version = "1.1.0", optional = true}
+rand = {version = "0.8.4", optional = true}
+js-sys = {version = "0.3.64", optional = true}
+wasm-bindgen = {version = "0.2.87", optional = true}

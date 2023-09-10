@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 export function usePotterScript() {
-  const [wasm, setWasm] = useState<any | null>(null)
+  const [wasm, setWasm] = useState<typeof import('potterscript-wasm') | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
