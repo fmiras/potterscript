@@ -32,9 +32,8 @@ export function Playground() {
     (e?: React.FormEvent<HTMLFormElement>) => {
       if (e) e.preventDefault()
       if (loading || !wasm) return
-      const ast = JSON.parse(wasm.parse(code))[1]
 
-      // TODO remove when println fixed
+      const ast = JSON.parse(wasm.parse(code))
       wasm.parse_and_run(code)
 
       setResult(JSON.stringify(ast, null, 2))
@@ -62,7 +61,7 @@ export function Playground() {
   }, [loading])
 
   return (
-    <div className="container h-full py-6">
+    <div className="playground container h-full py-6">
       <div className="grid h-full items-stretch gap-6">
         <div className="md:order-1">
           <div className="mt-0 border-0 p-0">
@@ -74,26 +73,39 @@ export function Playground() {
                     onSubmit={handleSubmit}
                     onKeyDown={handleKeyDown}
                   >
+                    <div className="flex items-center">
+                      <h2 className="text-lg font-semibold">Code</h2>
+                    </div>
                     <Textarea
                       placeholder={defaultCode}
                       value={code}
                       onChange={(e) => setCode(e.target.value)}
-                      className="h-full min-h-[300px] lg:min-h-[700px] xl:min-h-[700px]"
+                      className="h-full min-h-[300px] lg:min-h-[500px] xl:min-h-[500px]"
                     />
-                    <div className="flex items-center space-x-2">
-                      <Button type="submit">Parse</Button>
-                      <span className="text-sm">or ⌘ + Enter</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">
+                        Inspect this tab browser console to see results
+                      </span>
+                      <div className="flex items-center space-x-2">
+                        <Button type="submit">Run</Button>
+                        <span className="text-sm">or ⌘ + Enter</span>
+                      </div>
                     </div>
                   </form>
                 </div>
                 <div className="space-y-5 h-full ">
+                  <div className="flex items-center">
+                    <h2 className="text-lg font-semibold">Abstract Syntax Tree (AST)</h2>
+                  </div>
                   <Textarea
-                    className="rounded-md border bg-muted h-full min-h-[300px] lg:min-h-[700px] xl:min-h-[700px]"
+                    className="rounded-md border bg-muted h-full min-h-[300px] lg:min-h-[500px] xl:min-h-[500px]"
                     readOnly
                     value={result}
                   />
-                  <div className="flex items-center space-x-2">
-                    <Button onClick={handleCopy}>Copy</Button>
+                  <div className="flex items-center justify-end">
+                    <div className="flex items-center space-x-2">
+                      <Button onClick={handleCopy}>Copy</Button>
+                    </div>
                   </div>
                 </div>
               </div>
