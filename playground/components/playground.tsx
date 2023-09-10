@@ -33,7 +33,10 @@ export function Playground() {
       if (e) e.preventDefault()
       if (loading || !wasm) return
       const ast = JSON.parse(wasm.parse(code))[1]
+
+      // TODO remove when println fixed
       wasm.parse_and_run(code)
+
       setResult(JSON.stringify(ast, null, 2))
     },
     [wasm, code, loading]
