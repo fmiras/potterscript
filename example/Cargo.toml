@@ -4,5 +4,5 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-potterscript-parser = { version = "0.1.0", path = "../parser" }
-potterscript-runtime = { version = "0.1.0", path = "../runtime" }
+potterscript-parser = { version = "0.2.0", path = "../parser" }
+potterscript-runtime = { version = "0.2.0", path = "../runtime" }
