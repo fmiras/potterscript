@@ -8,6 +8,8 @@ use potterscript_parser::{
 };
 #[cfg(feature = "std")]
 use rand::Rng;
+#[cfg(feature = "js")]
+use web_sys::console;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum RuntimeValue {
@@ -143,6 +145,7 @@ pub struct Runtime {
 pub trait RuntimeAdapter {
     fn create_random_index() -> usize;
     fn lumos(string: String) -> String;
+    fn log(string: &str);
 }
 
 #[cfg(feature = "std")]
@@ -155,6 +158,10 @@ impl RuntimeAdapter for Runtime {
     fn lumos(string: String) -> String {
         string.black().on_white().to_string()
     }
+
+    fn log(string: &str) {
+        println!("{}", string);
+    }
 }
 
 #[cfg(feature = "js")]
@@ -165,6 +172,10 @@ impl RuntimeAdapter for Runtime {
 
     fn lumos(string: String) -> String {
         string
+    }
+
+    fn log(string: &str) {
+        console::log_1(&string.into());
     }
 }
 
@@ -309,7 +320,7 @@ impl Runtime {
                     None
                 }
                 Some(Expression::Atom(Atom::String(string))) => {
-                    Some(RuntimeValue::String(string + "asdasdas🔥"))
+                    Some(RuntimeValue::String(string + "🔥"))
                 }
                 _ => None,
             },
@@ -317,7 +328,7 @@ impl Runtime {
             Spell::OculusReparo => RuntimeValue::String("👓".to_string()).into(),
             Spell::Serpensortia => RuntimeValue::String("🐍".to_string()).into(),
             Spell::Periculum => {
-                println!("🔥🔥🔥🔥🔥🔥🔥🔥🔥");
+                Self::log("🔥🔥🔥🔥🔥🔥🔥🔥🔥");
                 None
             }
             Spell::Lumos => {
@@ -400,7 +411,7 @@ impl Runtime {
                     if self.is_lumos_casted {
                         string_target = Self::lumos(string_target);
                     }
-                    println!("{}", string_target);
+                    Self::log(&string_target);
                     None
                 }
                 None => None,
