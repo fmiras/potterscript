@@ -17,7 +17,7 @@ Cast spells with your virtual wand and experience these magical functions:
 - **Magical Expressions:** Perform magical operations like `~Engorgio {integer}` to increment numbers.
 - **Visual Spells:** Create visual effects like `~Lumos` to print with black letters on a white background.
 - **Emotional Spells:** Feel the power of `~Serpensortia` that returns "🐍", and many more!
-A detailed list of spell functions can be found [here](src/parser.rs#L150).
+A detailed list of spell functions can be found [here](parser/src/lib.rs#L136).
 
 ### Quidditch Loops
 Model your loops after a Quidditch match and use a 'Snitch' condition to end them. 
