@@ -10,6 +10,6 @@ default = ["std"]
 std = ["colored", "rand"]
 
 [dependencies]
-potterscript-parser = { version = "0.2.0", path = "../parser" }
+potterscript-parser = { path = "../parser" }
 colored = { version = "1.1.0", optional = true }
 rand = { version = "0.8.4", optional = true }
