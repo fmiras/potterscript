@@ -1,8 +1,10 @@
 use std::io::Write;
 
+use potterscript_runtime::DefaultRuntimeAdapter;
+
 fn main() {
-    let mut runtime = potterscript_runtime::Runtime::new();
-    println!("PotterScript REPL (Cast `~AvadaKedavra` to exit)");
+    let mut runtime = potterscript_runtime::Runtime::new(DefaultRuntimeAdapter);
+    println!("PotterScript REPL (Cast `~AvadaKedabra` to exit)");
 
     loop {
         let mut input = String::new();

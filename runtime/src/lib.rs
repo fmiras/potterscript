@@ -8,8 +8,6 @@ use potterscript_parser::{
 };
 #[cfg(feature = "std")]
 use rand::Rng;
-#[cfg(feature = "js")]
-use web_sys::console;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum RuntimeValue {
@@ -135,53 +133,43 @@ impl ops::Not for RuntimeValue {
     }
 }
 
-pub struct Runtime {
+pub trait RuntimeAdapter {
+    fn create_random_index(&self) -> usize;
+    fn lumos(&self, string: String) -> String;
+    fn log(&self, string: &str);
+}
+
+#[cfg(feature = "std")]
+pub struct DefaultRuntimeAdapter;
+
+#[cfg(feature = "std")]
+impl RuntimeAdapter for DefaultRuntimeAdapter {
+    fn create_random_index(&self) -> usize {
+        let mut rng = rand::thread_rng();
+        rng.gen_range(0..=3)
+    }
+
+    fn lumos(&self, string: String) -> String {
+        string.black().on_white().to_string()
+    }
+
+    fn log(&self, string: &str) {
+        println!("{}", string);
+    }
+}
+
+pub struct Runtime<T: RuntimeAdapter> {
+    runtime_adapter: T,
     variables: HashMap<String, RuntimeValue>,
     constants: HashMap<String, RuntimeValue>,
     quidditch: bool,
     is_lumos_casted: bool,
 }
 
-pub trait RuntimeAdapter {
-    fn create_random_index() -> usize;
-    fn lumos(string: String) -> String;
-    fn log(string: &str);
-}
-
-#[cfg(feature = "std")]
-impl RuntimeAdapter for Runtime {
-    fn create_random_index() -> usize {
-        let mut rng = rand::thread_rng();
-        rng.gen_range(0..=3)
-    }
-
-    fn lumos(string: String) -> String {
-        string.black().on_white().to_string()
-    }
-
-    fn log(string: &str) {
-        println!("{}", string);
-    }
-}
-
-#[cfg(feature = "js")]
-impl RuntimeAdapter for Runtime {
-    fn create_random_index() -> usize {
-        js_sys::Math::floor(js_sys::Math::random() * 4.0) as usize
-    }
-
-    fn lumos(string: String) -> String {
-        string
-    }
-
-    fn log(string: &str) {
-        console::log_1(&string.into());
-    }
-}
-
-impl Runtime {
-    pub fn new() -> Self {
+impl<T: RuntimeAdapter> Runtime<T> {
+    pub fn new(runtime_adapter: T) -> Self {
         Self {
+            runtime_adapter,
             variables: HashMap::new(),
             constants: HashMap::new(),
             quidditch: false,
@@ -280,7 +268,7 @@ impl Runtime {
                     HogwartsHouse::Slytherin,
                 ];
 
-                let index = Self::create_random_index();
+                let index = self.runtime_adapter.create_random_index();
                 let random_house = houses[index];
                 Some(RuntimeValue::HogwartsHouse(random_house.clone()))
             }
@@ -328,7 +316,7 @@ impl Runtime {
             Spell::OculusReparo => RuntimeValue::String("👓".to_string()).into(),
             Spell::Serpensortia => RuntimeValue::String("🐍".to_string()).into(),
             Spell::Periculum => {
-                Self::log("🔥🔥🔥🔥🔥🔥🔥🔥🔥");
+                self.runtime_adapter.log("🔥🔥🔥🔥🔥🔥🔥🔥🔥");
                 None
             }
             Spell::Lumos => {
@@ -409,9 +397,9 @@ impl Runtime {
                         .unwrap_or(RuntimeValue::String("".to_string()))
                         .to_string();
                     if self.is_lumos_casted {
-                        string_target = Self::lumos(string_target);
+                        string_target = self.runtime_adapter.lumos(string_target);
                     }
-                    Self::log(&string_target);
+                    self.runtime_adapter.log(&string_target);
                     None
                 }
                 None => None,

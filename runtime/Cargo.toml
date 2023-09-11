@@ -8,12 +8,8 @@ edition.workspace = true
 [features]
 default = ["std"]
 std = ["colored", "rand"]
-js = ["js-sys", "wasm-bindgen", "web-sys"]
 
 [dependencies]
 potterscript-parser = { version = "0.2.0", path = "../parser" }
 colored = { version = "1.1.0", optional = true }
 rand = { version = "0.8.4", optional = true }
-js-sys = { version = "0.3.64", optional = true }
-wasm-bindgen = { version = "0.2.87", optional = true }
-web-sys = { version = "0.3.64", features = ["console"], optional = true }
