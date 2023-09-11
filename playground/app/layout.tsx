@@ -12,7 +12,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={ysabeuSC.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          themes={['light', 'dark', 'gryffindor', 'slytherin', 'hufflepuff', 'ravenclaw']}
+        >
           <main>{children}</main>
           <Toaster />
         </ThemeProvider>

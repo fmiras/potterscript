@@ -64,6 +64,127 @@
     --input: 12 6.5% 15.1%;
     --ring: 24 5.7% 82.9%;
   }
+
+  .gryffindor {
+    --background: 0 68% 40%;
+    --foreground: 43 86% 64%;
+
+    --card: 0 68% 38%;
+    --card-foreground: 43 86% 62%;
+
+    --popover: 0 68% 36%;
+    --popover-foreground: 43 86% 60%;
+
+    --primary: 0 100% 55%;
+    --primary-foreground: 60 10% 97%;
+
+    --secondary: 43 86% 40%;
+    --secondary-foreground: 0 68% 64%;
+
+    --muted: 0 20% 35%;
+    --muted-foreground: 43 20% 60%;
+
+    --accent: 43 100% 50%;
+    --accent-foreground: 0 68% 64%;
+
+    --destructive: 0 100% 40%;
+    --destructive-foreground: 43 86% 64%;
+
+    --border: 0 10% 35%;
+    --input: 0 10% 40%;
+    --ring: 43 50% 60%;
+  }
+
+  .slytherin {
+    --background: 144 31% 30%;
+    --foreground: 0 0% 67%;
+
+    --card: 144 31% 28%;
+    --card-foreground: 0 0% 65%;
+
+    --popover: 144 31% 26%;
+    --popover-foreground: 0 0% 63%;
+
+    --primary: 144 100% 25%;
+    --primary-foreground: 60 10% 97%;
+
+    --secondary: 0 0% 67%;
+    --secondary-foreground: 144 31% 30%;
+
+    --muted: 144 20% 25%;
+    --muted-foreground: 0 0% 60%;
+
+    --accent: 0 0% 65%;
+    --accent-foreground: 144 31% 30%;
+
+    --destructive: 0 100% 40%;
+    --destructive-foreground: 144 31% 30%;
+
+    --border: 144 10% 25%;
+    --input: 144 10% 28%;
+    --ring: 0 50% 65%;
+  }
+
+  .hufflepuff {
+    --background: 44 100% 60%;
+    --foreground: 0 0% 0%;
+
+    --card: 44 100% 58%;
+    --card-foreground: 0 0% 10%;
+
+    --popover: 44 100% 56%;
+    --popover-foreground: 0 0% 8%;
+
+    --primary: 44 100% 55%;
+    --primary-foreground: 60 10% 97%;
+
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 44 100% 60%;
+
+    --muted: 44 30% 55%;
+    --muted-foreground: 0 0% 10%;
+
+    --accent: 0 0% 8%;
+    --accent-foreground: 44 100% 60%;
+
+    --destructive: 0 100% 40%;
+    --destructive-foreground: 44 100% 60%;
+
+    --border: 44 20% 55%;
+    --input: 44 20% 58%;
+    --ring: 0 50% 10%;
+  }
+
+.ravenclaw {
+  --background: 240 20% 20%;
+  --foreground: 0 0% 100%;
+  
+  --card: 240 20% 25%;
+  --card-foreground: 0 0% 100%;
+  
+  --popover: 240 20% 30%;
+  --popover-foreground: 0 0% 100%;
+  
+  --primary: 240 80% 50%;
+  --primary-foreground: 0 0% 100%;
+  
+  --secondary: 58 60% 80%; /* Brightened */
+  --secondary-foreground: 0 0% 0%;
+  
+  --muted: 240 20% 40%;
+  --muted-foreground: 0 0% 100%;
+  
+  --accent: 58 60% 50%;
+  --accent-foreground: 0 0% 0%;
+  
+  --destructive: 0 100% 50%;
+  --destructive-foreground: 0 0% 100%;
+  
+  --border: 240 20% 30%;
+  --input: 240 20% 35%;
+  --ring: 58 60% 60%;  /* Adjusted to match the brighter secondary color */
+}
+
 }
 
 @layer base {

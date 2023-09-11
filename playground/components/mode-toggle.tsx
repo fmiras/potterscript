@@ -27,6 +27,10 @@ export function ModeToggle() {
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => setTheme('light')}>Light</DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme('dark')}>Dark</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme('gryffindor')}>Gryffindor</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme('slytherin')}>Slytherin</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme('hufflepuff')}>Hufflepuff</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme('ravenclaw')}>Ravenclaw</DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme('system')}>System</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
