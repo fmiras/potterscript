@@ -8,6 +8,12 @@ This project is a remarkable endeavor to understand the magical connection betwe
 
 Powered by Rust and its incredible features like godlike error handling and orgasmic memory safety, PotterScript provides a solid toolkit for creating an enchanting programming experience.
 
+## 🚀 Get Started
+Ready to embark on this magical journey? There are a few options
+- [Web Playground](https://potterscript.fmiras.com) is an interactive playground where you can write, parse and run PotterScript code within the browser. This is possible because PotterScript parser and runtime were adapted and compiled to a [WebAssembly library](wasm).
+- [Ron](ron) is a REPL program, basically a terminal-based live console for running PotterScript code.
+- You can directly use the [parser](parser) and [runtime](runtime) on your Rust code and do stuff, you can check the [example project](example) that takes an `input.potter` file, parses and evals the code.
+
 ## 🧙‍♂️ Features
 ### Spell Functions
 Cast spells with your virtual wand and experience these magical functions:
@@ -82,8 +88,7 @@ if house = Griffindor {
 ## 🧰 Technology
 PotterScript utilizes Rust's excellent [nom](https://github.com/rust-bakery/nom) library to create custom parsers.
 
-## 🚀 Get Started
-Ready to embark on this magical journey? Run the following to eval `input.potter` file and use the REPL program:
+Run the following to eval `input.potter` file and use the REPL program:
 ```bash
 cargo run
 ```
