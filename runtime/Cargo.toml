@@ -4,6 +4,7 @@ description = "PotterScript Runtime."
 license = "MIT"
 version.workspace = true
 edition.workspace = true
+repository = "https://github.com/fmiras/potterscript"
 
 [features]
 default = ["std"]
