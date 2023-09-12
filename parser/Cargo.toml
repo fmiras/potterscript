@@ -4,6 +4,7 @@ description = "PotterScript parser."
 license = "MIT"
 version.workspace = true
 edition.workspace = true
+repository = "https://github.com/fmiras/potterscript"
 
 [dependencies]
 nom = "7.1.3"
