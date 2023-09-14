@@ -32,23 +32,6 @@ You can only cast a spell on one target, and the spell will do something with th
 
 Spells can also of course mutate the target, like `~Engorgio {target}` that will increment the target value by one.
 
-<!--     Aguamenti,
-    AvadaKedabra,
-    Engorgio,
-    Incendio,
-    Inmobolus,
-    Lumos,
-    Nox,
-    Obliviate,
-    OculusReparo,
-    Periculum,
-    Reducio,
-    PetrificusTotalus,
-    Revelio,
-    Serpensortia,
-    WingardiumLeviosa,
- -->
-
 List of spells:
 
 - `~Aguamenti` (no target): Returns "💦"
