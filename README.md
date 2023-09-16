@@ -22,7 +22,7 @@ Ready to embark on this magical journey? Here you have a few options:
 
 ### Spell Functions
 
-In PotterScript there are no such things as functions or args, but there are **spells** and **targets**. To cast a spell you have to use the wand character `~` following by the spell name and the target expression.
+In PotterScript there are no such things as functions or args, but there are **spells** and **targets**. To cast a spell you have to use the wand character `~` followed by the spell name and the target expression.
 
 You can only cast a spell on one target, and the spell will do something with the target. For example, the `~Revelio {target}` spell will print the target expression (variable or raw value) to the console.
 
@@ -31,6 +31,12 @@ You can only cast a spell on one target, and the spell will do something with th
 ```
 
 Spells can also of course mutate the target, like `~Engorgio {target}` that will increment the target value by one.
+
+```potter
+index = 0
+~Engorgio index
+~Revelio index # prints "1"
+```
 
 List of spells:
 
@@ -146,10 +152,6 @@ Outputs:
 - [ ] Compiler
   - [ ] Binary ([LLVM](https://llvm.org))
   - [ ] WASM
-
-## 📜 License
-
-Licensed under the MIT License. See [LICENSE](LICENSE.md) for more details.
 
 ## 🌟 Contribute
 
