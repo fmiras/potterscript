@@ -1,10 +1,12 @@
-import { ModeToggle } from './mode-toggle'
+import { GithubButton } from '@/components/github-button'
+import { ModeToggle } from '@/components/mode-toggle'
 
 export function Header() {
   return (
-    <div className="container flex flex-col items-start justify-between space-y-2 py-4 sm:flex-row sm:items-center sm:space-y-0 md:h-16">
-      <h2 className="text-lg font-semibold w-full">PotterScript Playground</h2>
-      <div className="ml-auto flex w-full space-x-2 sm:justify-end">
+    <div className="container flex justify-between space-x-2 py-4 md:h-16">
+      <h2 className="text-lg font-semibold">PotterScript Playground</h2>
+      <div className="flex justify-end space-x-2">
+        <GithubButton />
         <ModeToggle />
       </div>
     </div>

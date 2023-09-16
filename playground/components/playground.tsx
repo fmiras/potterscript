@@ -1,9 +1,11 @@
 'use client'
+
 import { useCallback, useEffect, useState } from 'react'
-import { Button } from './ui/button'
-import { Textarea } from './ui/textarea'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 import { usePotterScript } from '@/hooks/use-potterscript'
-import { useToast } from './ui/use-toast'
+import { useToast } from '@/components/ui/use-toast'
+import { ConsoleAlert } from './console-alert'
 
 const defaultCode = `index = 0
 
@@ -61,57 +63,43 @@ export function Playground() {
   }, [loading])
 
   return (
-    <div className="playground container h-full py-6">
-      <div className="grid h-full items-stretch gap-6">
-        <div className="md:order-1">
-          <div className="mt-0 border-0 p-0">
-            <div className="flex flex-col space-y-4">
-              <div className="grid h-full grid-rows-2 gap-6 lg:grid-cols-2 lg:grid-rows-1">
-                <div className="h-full">
-                  <form
-                    className="h-full space-y-5"
-                    onSubmit={handleSubmit}
-                    onKeyDown={handleKeyDown}
-                  >
-                    <div className="flex items-center">
-                      <h2 className="text-lg font-semibold">Code</h2>
-                    </div>
-                    <Textarea
-                      placeholder={defaultCode}
-                      value={code}
-                      onChange={(e) => setCode(e.target.value)}
-                      className="h-full min-h-[300px] lg:min-h-[500px] xl:min-h-[500px]"
-                    />
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">
-                        Inspect this tab browser console to see results
-                      </span>
-                      <div className="flex items-center space-x-2">
-                        <Button type="submit">Run</Button>
-                        <span className="text-sm">or ⌘ + Enter</span>
-                      </div>
-                    </div>
-                  </form>
-                </div>
-                <div className="space-y-5 h-full ">
-                  <div className="flex items-center">
-                    <h2 className="text-lg font-semibold">Abstract Syntax Tree (AST)</h2>
-                  </div>
-                  <Textarea
-                    className="rounded-md border bg-muted h-full min-h-[300px] lg:min-h-[500px] xl:min-h-[500px]"
-                    readOnly
-                    value={result}
-                  />
-                  <div className="flex items-center justify-end">
-                    <div className="flex items-center space-x-2">
-                      <Button onClick={handleCopy}>Copy</Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+    <div className="flex flex-col container space-y-2 h-screen lg:flex-grow lg:py-6 lg:space-y-4">
+      <ConsoleAlert />
+
+      <div className="flex flex-col flex-grow border-0 p-0 lg:grid lg:gap-6 lg:grid-cols-2">
+        <form
+          className="flex flex-col flex-grow space-y-5"
+          onSubmit={handleSubmit}
+          onKeyDown={handleKeyDown}
+        >
+          <h2 className="text-lg font-semibold">Code</h2>
+
+          <Textarea
+            placeholder={defaultCode}
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            className="flex-grow bg-muted font-mono"
+          />
+          <div className="flex items-center justify-end">
+            <div className="flex items-center space-x-2">
+              <Button className="block lg:hidden" type="submit">
+                Parse
+              </Button>
+              <Button className="hidden lg:block" type="submit">
+                Run
+              </Button>
+              <span className="hidden lg:block text-sm">or ⌘ + Enter</span>
             </div>
           </div>
-        </div>
+        </form>
+
+        <form className="flex flex-col flex-grow space-y-5">
+          <h2 className="text-lg font-semibold">Abstract Syntax Tree (AST)</h2>
+          <Textarea className="flex-grow bg-muted font-mono" readOnly value={result} />
+          <div className="flex items-center justify-end">
+            <Button onClick={handleCopy}>Copy</Button>
+          </div>
+        </form>
       </div>
     </div>
   )

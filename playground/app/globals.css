@@ -195,7 +195,3 @@
     @apply bg-background text-foreground;
   }
 }
-
-.playground textarea {
-  font-family: monospace;
-}
